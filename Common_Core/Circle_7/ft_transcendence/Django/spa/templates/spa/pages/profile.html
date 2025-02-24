@@ -1,0 +1,127 @@
+<div id="profile-page" class="page-container align-center">
+	<h1> Profile </h1>
+	<!-- Display the user's profile picture -->
+	<img id="profile-picture" src="{{ user_profile.profile_picture.url }}" alt="{{ user_profile.username }}'s Profile Picture" width="200" height="200">
+	
+	<!-- Display the user's username -->
+	<div id="user-username">{{ user_profile.username }}</div>
+
+	<!-- Additional user information can be displayed here -->
+	<div id="user-email">email: {{ user_profile.email }}</div>
+	<div id="user-join-date">Joined on: {{ user_profile.date_joined }}</div>
+	{% if is_own_profile %}
+	<a href="/profile_editor" onclick="route(event)">Edit</a>
+	<!--<a href="/friend_requests" onclick="route(event)">Add friends</a>-->
+	{% endif %}
+	{% if friends and not is_own_profile %}
+		<div id="friend">Your friend since {{ friends.created_on }}</div>
+	{% endif %}
+	
+	{% if blocked %}
+		<div id="blocked">You have blocked him since {{ blocked.created_on }}</div>
+	{% endif %}
+
+	<!-- If not already blocked, block user -->
+	{% if not is_own_profile %}
+	<div id="game-stats">
+		<h4>Pong ladder: {{ tournament_score }} for {{ finished_tournament_count }} tournament(s)</h4>
+		<h4>Pong: {{ pong_wins }}/{{ pong_losses }} [W/L]</h4>
+		<h4>Shifumi {{ shifumi_wins }}/{{ shifumi_losses }}/{{ shifumi_draws }} [W/L/D]</h4>
+	</div>
+		<!-- Display friend request buttons if viewing another user's profile -->
+		{% if not friendship and not request_pending and not blocked %}
+			{% csrf_token %}
+			<button id='send-friend-request-button' class="btn btn-light" type="button" data-username="{{ user_profile.username }}">Send Friend Request</button>
+			<span id="friend-request-validation" class="validation-message text-success"></span>
+			<span id="friend_request-error" class="error-message text-danger"></span>
+		{% elif not friendship and request_pending and not blocked %}
+			{% csrf_token %}
+			<button id='remove-friend-request-button' class="btn btn-light" type="button" data-username="{{ user_profile.username }}">Remove Friend Request</button>
+			<span id="remove-friend-request-validation" class="validation-message text-success"></span>
+			<span id="remove-friend_request-error" class="error-message text-danger"></span>
+		{% endif %}
+		{% if not blocked %}
+			{% csrf_token %}
+			<button id='block-user-button' class="btn btn-dark" type="button" data-username="{{ user_profile.username }}">Block user</button>
+			<span id="blocked-validation" class="validation-message text-success"></span>
+			<span id="block-error" class="error-message text-danger"></span>
+		{% else %}
+			{% csrf_token %}
+			<button id='unblock-user-button' class="btn btn-light" type="button" data-username="{{ user_profile.username }}">Unblock user</button>
+			<span id="unblocked-validation" class="validation-message text-success"></span>
+			<span id="unblock-error" class="error-message text-danger"></span>
+		{% endif %}
+		{% if friendship %}
+			{% csrf_token %}
+			<button id='remove-friend-button' class="btn btn-dark" type="button" data-username="{{ user_profile.username }}">Remove Friend</button>
+			<span id="remove-friend-validation" class="validation-message text-success"></span>
+			<span id="remove-error" class="error-message text-danger"></span>
+		{% endif %}
+	<!-- If own_profile -->
+	{% else %}
+		<div id="game-stats">
+			<h4>Pong ladder: {{ tournament_score }} for {{ finished_tournament_count }} tournament(s)</h4>
+			<h4>Pong: {{ pong_wins }}/{{ pong_losses }} [W/L]</h4>
+			<h4>Shifumi {{ shifumi_wins }}/{{ shifumi_losses }}/{{ shifumi_draws }} [W/L/D]</h4>
+		</div>
+		<!-- <h3>Find a User</h3> -->
+		<form id="find-user-form">
+			{% csrf_token %}
+			<div class="form-group">
+				<span id="find-user-error" class="error-message text-danger"></span>
+			</div>				
+			<div class="form-group">
+				<!-- <label for="find-user-username">Username</label> -->
+				<input type="text" class="form-control" id="find-user-username"  placeholder="find users" name="find-user-username" required>
+			</div>
+			<button type="submit" class="btn btn-dark">Search</button>
+		</form>
+		
+		{% if friends %}
+			<h3>Friendlist</h3>
+			<div class="friends-grid">
+				{% for friend in friends %}
+				<div class="friend-card">
+					<button id='friend-profile-button' class="socials-card" data-username="{{ friend.username }}" target="_blank" style="background-color: transparent;">
+						<img src="{{ friend.profile_picture.url }}" alt="{{ friend.username }}'s profile picture" width="40" height="45">
+						<p>{{ friend.username }}</p>
+					</button>
+				</div>
+				{% endfor %}
+			</div>
+		{% endif %}
+	
+		
+		{% if received_requests %}
+			<h3>Friend Requests</h3>
+			<ul>
+				{% for request in received_requests %}
+				<li>
+					{{ request.from_user.username }}
+						<button id="accept-friend-request-button" class="btn btn-dark" type="button" data-id="{{ request.id }}">Accept</button>
+						<span id="accept-friend-request-error" class="error-message text-danger"></span>
+						<button id="deny-friend-request-button" class="btn btn-dark" type="button" data-id="{{ request.id }}">Deny</button>
+						<span id="deny-friend-request-error" class="error-message text-danger"></span>
+						<button id="block-user-button" class="btn btn-dark" type="button" data-username="{{ request.from_user.username }}">Block</button>
+						<span id="block-user-error" class="error-message text-danger"></span>
+				</li>
+				{% endfor %}
+			</ul>
+		{% endif %}
+
+		{% if blocked_users %}
+			<h3>Blockedex</h3>
+			<ul>
+				{% for blocked in blocked_users %}
+				<button id='friend-profile-button' class="socials-card" data-username="{{ blocked.to_user.username }}" target="_blank" style="background-color: transparent;">
+					<img src="{{ blocked.to_user.profile_picture.url }}" alt="{{ blocked.to_user.username }}'s profile picture" width="40" height="45">
+					<p>{{ blocked.to_user.username }}</p>
+				</button>
+				{% endfor %}
+			</ul>
+		{% endif %}
+	{% endif %}
+</div>
+
+
+

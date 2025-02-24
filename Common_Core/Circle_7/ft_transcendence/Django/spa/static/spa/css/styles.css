@@ -1,0 +1,274 @@
+@font-face {
+    font-family: 'Terminator';
+    src: url('fonts/terminator-real-nfi.regular.ttf');
+    font-weight: normal;
+    font-size: normal;
+  }
+
+* {
+    margin: 0; /* Reset margin for all elements */
+    padding: 0; /* Reset padding for all elements */
+    box-sizing: border-box; /* Include padding and border in element's total width and height */
+}
+
+html, body {
+    background-color: black;
+    color: white;
+    font-family: sans-serif;
+    height: 100%;
+}
+
+p {
+    margin-block-start: 0;
+    text-indent: 1rem;
+}
+
+#main-page {
+    font-family: 'Terminator';
+    flex-grow: 1;
+}
+
+#nightCityModeBtn {
+    border: none;
+    outline: none; /* Remove outline */
+}
+
+#root {
+    background-color: black;
+    color: white;
+    display: flex;
+    height: 100%;
+}
+
+.sidebar {
+    background-color: inherit;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+
+    border-right: 1px solid black;
+}
+
+.sidebar > a {
+    font-family: 'Terminator';
+    color: inherit;
+    margin: 0.5rem 0;
+}
+
+.page-container {
+    display: flex;
+    flex-direction: column;
+
+    padding: 0 1rem;
+}
+
+.align-center {
+    align-items: center;
+}
+
+.socials-container {
+    display: flex;
+    justify-content: space-between;
+}
+
+.socials-card {
+    display: flex;
+    align-items: center;
+
+    border: 1px solid black;
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    margin: 1rem;
+
+    text-decoration: none;
+    color: unset;
+}
+
+.socials-card:hover {
+    background-color: black;
+}
+
+.socials-card > i {
+    font-size: 1.5rem;
+    margin-right: 0.5rem;
+}
+
+body::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}
+
+.buttons-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    gap: 10px; /* Adjust the gap as needed */
+}
+.buttons-container button {
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.buttons-container i {
+    font-size: 42px;
+}
+
+.buttons-container button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* a changer */
+.validation-message {
+    display: block;
+    margin-top: 5px;
+    font-size: 14px;
+}
+
+.text-success {
+    color: green;
+}
+
+#profile-button-logo {
+    width: 40px; /* Ensure the width and height are equal for a perfect circle */
+    height: 40px;
+    border-radius: 50%; /* Makes the image circular */
+    object-fit: cover; /* Ensures the image covers the area */
+}
+
+#nightCityModeBtnImg {
+    border: none;
+    outline: none; /* Remove outline */
+  }
+
+.score {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.header, .scores {
+    display: flex;
+    align-items: center;
+    margin: 5px 0;
+}
+
+.header h2, .scores p {
+    margin: 0 10px;
+}
+.header h2 {
+    font-weight: normal;
+}
+
+#main-nav {
+    position: relative; /* Ensure the nav is relatively positioned */
+  }
+
+#audioButton {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    width: 40px;
+    background-color: black;
+    color: white;
+    border-color: white;
+    display: flex;
+    align-items: center;
+  }
+
+#logout-button {
+    position: absolute;
+    bottom: 10px; /* Adjust this value as needed */
+    left: 10px; /* Adjust this value as needed */
+    width: 40px;
+    background-color: black;
+    border-color: white;
+    display: flex;
+    align-items: center;
+  }
+  
+  #logout-button .mdi {
+    margin-right: 8px; /* Adjust margin as needed */
+  }
+
+.sent-message {
+    text-align: right;
+}
+
+.received-message {
+    text-align: left;
+}
+
+.message {
+    display: inline-block;
+    max-width: 70%;
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin-bottom: 4px;
+}
+
+.sent-message .message {
+    background-color: #dcf8c6;
+}
+
+.received-message .message {
+    background-color: #f2f2f2;
+}
+
+.timestamp {
+    font-size: 0.8em;
+    color: #888;
+}
+
+/* Custom scrollbar styles for the message area */
+body:not(.cyberpunk) #message-area {
+    scrollbar-width: thin; /* For Firefox */
+    scrollbar-color: black white; /* thumb color, track color */
+}
+
+/* For WebKit browsers (Chrome, Safari) */
+body:not(.cyberpunk) #message-area::-webkit-scrollbar {
+    width: 8px; /* Width of the scrollbar */
+}
+
+body:not(.cyberpunk) #message-area::-webkit-scrollbar-track {
+    background: white; /* Track color */
+}
+
+body:not(.cyberpunk) #message-area::-webkit-scrollbar-thumb {
+    background: black; /* Thumb color */
+    border-radius: 10px; /* Rounded corners for the thumb */
+}
+
+/* Custom scrollbar styles for the message area */
+body:not(.cyberpunk) #pong-history,
+body:not(.cyberpunk) #shifumi-history {
+    scrollbar-width: thin; /* For Firefox */
+    scrollbar-color: black white; /* thumb color, track color */
+}
+
+/* For WebKit browsers (Chrome, Safari) */
+body:not(.cyberpunk) #pong-history::-webkit-scrollbar,
+body:not(.cyberpunk) #shifumi-history::-webkit-scrollbar {
+    width: 8px; /* Width of the scrollbar */
+}
+
+body:not(.cyberpunk) #pong-history::-webkit-scrollbar-track,
+body:not(.cyberpunk) #shifumi-history::-webkit-scrollbar-track {
+    background: white; /* Track color */
+}
+
+body:not(.cyberpunk) #pong-history::-webkit-scrollbar-thumb,
+body:not(.cyberpunk) #shifumi-history::-webkit-scrollbar-thumb {
+    background: black; /* Thumb color */
+    border-radius: 10px; /* Rounded corners for the thumb */
+}
+
+.main-content {
+    z-index: 1;
+}

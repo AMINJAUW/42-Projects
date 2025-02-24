@@ -1,0 +1,41 @@
+<div class="page-container align-center">
+    <h1>Pong Lobby</h1>
+    <div class="pong-options">
+        <a href="/pong_local" onclick="route(event)">Play local</a>
+    </div>
+    <div id="tournament_nickname">
+        {% if request.user.nickname %}
+        <p id="nickname">Your current tournament nickname is {{ request.user.nickname }}</p>
+        {% else %}
+        <p id="nickname">you don't have a nickname, change it !</p>
+        {% endif %}
+        <form id="nickname_change_form">
+            <div class="form-group">
+                <input type="text" class="form-control" id="change-nickname" placeholder="tournaments nickname" name="change-nickname" required>
+                <span id="nickname-error" class="error-message text-danger"></span>
+                <button id="change-nickname_button" type="submit" class="btn btn-dark">change nickname</button>
+            </div>
+        </form>
+    </div>
+    <div class="pong-options">
+        <p id="lobby-status"></p>
+        <button id="matchmaking-btn" class="btn btn-dark" data-game_type="pong">Find a Match</button>
+        <div id="match-status" style="display: none;"></div>
+        <button id="create-tournament-btn" class="btn btn-light">Create Tournament</button>
+
+        <h4 id="your-tournaments-title">Your tournaments</h4>
+        <ul id="your-tournament-list" data-currentUser="{{ request.user }}" style="height: 200px; overflow-y: auto;">
+            <!-- Tournament list will be populated here -->
+        </ul>
+        
+        <h4 id="available-tournaments-title">Available tournaments</h4>
+        <ul id="available-tournament-list" style="height: 200px; overflow-y: auto;">
+            <!-- Tournament list will be populated here -->
+        </ul>
+        
+        <h4 id="finished-tournaments-title">Previous tournaments</h4>
+        <ul id="finished-tournament-list" style="height: 200px; overflow-y: auto;">
+            <!-- Tournament list will be populated here -->
+        </ul>
+    </div>
+</div>

@@ -1,0 +1,32 @@
+<div class="page-container align-center">
+    <section id="shifumi-game" class="shifumi-game" data-room-name="{{ room_name }}" data-player-username="{{ request.user.username }}">
+        <!--Title -->
+        <h1> ShiFuMi </h1>
+         
+        <!--Display Score of players -->
+        <div class="score">  
+            <div id="player-names"></div>
+            <div id="player-scores"></div>
+        </div>
+       
+        <div class="move">Choose your move</div>
+         
+        <!--Number of moves left before game ends -->
+        <div class="round-info">Round: 1/10</div>
+         
+        <!--Options available to player to play game -->
+        <div class="options">
+            <button id="rock" class="btn btn-light">Rock</button>
+            <button id="paper" class="btn btn-light">Paper</button>
+            <button id="scissors" class="btn btn-light">Scissors</button>        
+        </div>
+        <div class="round-log"></div>
+        <!--Final result of game -->
+        <div class="result"></div>
+        <div class="countdown" style="display: none;"></div>
+        <div id="game-over" style="display: none;">
+            <h1 id="game-over-message" style="font-size: 3rem; text-align: center;"></h1>
+            <button id="go-back-button" style="font-size: 1.5rem; margin-top: 20px;">Go to shifumi Lobby</button>
+        </div>
+    </section>
+</div>

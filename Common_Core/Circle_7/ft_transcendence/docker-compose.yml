@@ -1,0 +1,57 @@
+services:
+    db:
+        image: postgres:13
+        env_file:
+            - .env
+        environment:
+            POSTGRES_DB: ${APP_DB_NAME}
+            POSTGRES_USER: ${APP_DB_USER}
+            POSTGRES_PASSWORD: ${APP_DB_PASSWORD}
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+        networks:
+            - backend
+        command: -p ${APP_DB_PORT}
+
+    db_channels:
+        image: postgres:13
+        env_file:
+            - .env
+        environment:
+            POSTGRES_DB: ${CHANNEL_DB_NAME}
+            POSTGRES_USER: ${CHANNEL_DB_USER}
+            POSTGRES_PASSWORD: ${CHANNEL_DB_PASSWORD}
+        volumes:
+            - postgres_channels_data:/var/lib/postgresql/data
+        networks:
+            - backend
+        ports:
+            - "${CHANNEL_DB_PORT}:5432"
+        command: -p 5433
+
+    web:
+        build:
+            context: ./Django
+            dockerfile: Dockerfile
+        volumes:
+            - ./Django:/app
+        env_file:
+            - .env
+        environment:
+            - DJANGO_SETTINGS_MODULE=SinglePageApp.settings
+        depends_on:
+            - db
+            - db_channels
+        networks:
+            - backend
+        ports:
+            - "443:443"  # Expose port 443 for HTTPS
+
+networks:
+    backend:
+
+volumes:
+    postgres_data:
+        name: database
+    postgres_channels_data:
+        name: database_channels
