@@ -1,0 +1,82 @@
+ganache v7.9.1 (@ganache/cli: 0.10.1, @ganache/core: 0.10.1)
+Starting RPC server
+
+Available Accounts
+==================
+(0) 0x5a9C28cABF0A5a4cD8215b6Ea33ea3999E94fe54 (1000 ETH)
+(1) 0xdB804cEaA47793E0599b0d68790571493A1b2d65 (1000 ETH)
+(2) 0x71761D70C5792A80cE86E2D090bA244402CE4aD2 (1000 ETH)
+(3) 0x8399CFBf74e3FD0888Cfb84F4328566c1819c4FF (1000 ETH)
+(4) 0x17573F3a38A848fF6daa0969027289019dfEeEf4 (1000 ETH)
+(5) 0xf1878064E12D62480ba694fcED2189AA6D298dC6 (1000 ETH)
+(6) 0x73703477d89bb40fB583f66563c06B4E3915437f (1000 ETH)
+(7) 0x7009051eDc98CD47602898fd47F568392e8D2610 (1000 ETH)
+(8) 0x59D08eeF28C475bD7515555905771b4bB72B3A58 (1000 ETH)
+(9) 0x4269b9b7bFC979f68f4c931a073289D0c53912A8 (1000 ETH)
+
+Private Keys
+==================
+(0) 0x42f74246bd3408b5563bf3ca72966d37c71e1af8932694b2527be115eba9680d
+(1) 0x2ee7b21a8baecac88442b7b78dc45cb0ef1e850aa04999d7794a19e160c03be2
+(2) 0x8921c1cce3310c2509cf37c681f3558e515c929144be58201d92c325ff54f61c
+(3) 0xefe77b456c1e0a9a280693bc2d548876c37d2e1359567b24bb9b424e07855726
+(4) 0xa605109b82c9fd0ad88464f46c4d3a67392a603b843fb3301dd5a4491984bde0
+(5) 0x5ed787950930bd427ee4638088d86be3ab8c8f2805754b68d91bcaac80e67172
+(6) 0x895d6989efec8960d6345c6c333f0ccae3a53c5db9fb5a17c5c194da728cb42c
+(7) 0xe2523e44929dc37715b9021d782f722a4a4eec3a832504ca1212ae1b2c371012
+(8) 0x7b571952d7be435b4d482d55894b2fa326dc89056d44eaae00696c4962105ebf
+(9) 0x54b4ee71a9f1767a5aaf673f73dfab7caa885dc0475f9c9594c18c38bd0e1923
+
+HD Wallet
+==================
+Mnemonic:      dirt pretty sand exhaust ivory scene trouble ketchup trend spice human ramp
+Base HD Path:  m/44'/60'/0'/0/{account_index}
+
+Default Gas Price
+==================
+2000000000
+
+BlockGas Limit
+==================
+30000000
+
+Call Gas Limit
+==================
+50000000
+
+Chain
+==================
+Hardfork: shanghai
+Id:       1337
+
+RPC Listening on 0.0.0.0:7545
+eth_blockNumber
+net_version
+eth_accounts
+eth_getBlockByNumber
+eth_accounts
+net_version
+eth_getBlockByNumber
+eth_getBlockByNumber
+net_version
+eth_getBlockByNumber
+eth_estimateGas
+net_version
+eth_blockNumber
+eth_getBlockByNumber
+eth_estimateGas
+eth_getBlockByNumber
+eth_gasPrice
+eth_sendTransaction
+
+  Transaction: 0x860b4936a7756512cfba00a10ff9c0cdd51502a242915a3552ad6e0cc053bab8
+  Contract created: 0xe1da3dacf725424e239ad792436c0c466f2c2590
+  Gas usage: 1060938
+  Block number: 1
+  Block time: Thu Oct 10 2024 13:48:10 GMT+0000 (Coordinated Universal Time)
+
+eth_getTransactionReceipt
+eth_getCode
+eth_getTransactionByHash
+eth_getBlockByNumber
+eth_getBalance
