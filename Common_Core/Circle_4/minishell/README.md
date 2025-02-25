@@ -1,43 +1,24 @@
-# 📌 **{PROJECT_NAME}**
+# The infamous Minishell
 
-> **{SHORT_DESCRIPTION}**
+The objective here is to rewrite the bash shell in C.  
+See the full [Project Subject](./en.subject.pdf)
+for more details.
 
----
+A good project to understand key concept of working on a big code base.  
+A lot of parsing went through,
+But especially a lot of testing on weird behaviors of bash
 
-📄 **Project Subject:**  
-[➡️ View en.subject.pdf](./en.subject.pdf)
-
-## 📥 Installation
+## Installation
 
 ```bash
 make
 ```
 
-## 📝 Usage
-
-Example usage command (modify as needed)
+## Usage
 ```bash
-./{EXECUTABLE_NAME} [OPTIONS]
-```
-
-## 🛠 Features
-
-- 🔹 **{FEATURE_1}**
-- 🔹 **{FEATURE_2}**
-- 🔹 **{FEATURE_3}**
-- *(Add or remove features as needed)*
-
-## 🏆 Achievements
-
-✅ **{If this project was graded, mention the score or any achievements here}**  
-✅ **{Mention any extra functionality or optimizations}**  
-
-## 📌 Additional Notes
-
-- 📜 **Dependencies:** {List any dependencies if applicable}  
-- 📚 **Resources Used:** {Links to documentation, articles, or anything relevant}  
+./minishell
+``` 
 
 ---
-
-🔗 **[⬅ Back to My Profile](https://github.com/AMINJAUW)**  
+**[⬅ Back to My Profile](https://github.com/AMINJAUW)**  
 📬 **Want to reach me? Contact me via GitHub!**

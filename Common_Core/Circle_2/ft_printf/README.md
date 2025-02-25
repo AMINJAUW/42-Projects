@@ -1,43 +1,22 @@
-# 📌 **{PROJECT_NAME}**
+# Recode of *printf* in C
 
-> **{SHORT_DESCRIPTION}**
+The objective here is to add ft_printf our own C library.  
+See the full [Project Subject](./en.subject.pdf)
+for more details.
 
----
-
-📄 **Project Subject:**  
-[➡️ View en.subject.pdf](./en.subject.pdf)
-
-## 📥 Installation
+## Installation
 
 ```bash
 make
 ```
 
-## 📝 Usage
+## Usage
 
-Example usage command (modify as needed)
+Example usage
 ```bash
-./{EXECUTABLE_NAME} [OPTIONS]
-```
-
-## 🛠 Features
-
-- 🔹 **{FEATURE_1}**
-- 🔹 **{FEATURE_2}**
-- 🔹 **{FEATURE_3}**
-- *(Add or remove features as needed)*
-
-## 🏆 Achievements
-
-✅ **{If this project was graded, mention the score or any achievements here}**  
-✅ **{Mention any extra functionality or optimizations}**  
-
-## 📌 Additional Notes
-
-- 📜 **Dependencies:** {List any dependencies if applicable}  
-- 📚 **Resources Used:** {Links to documentation, articles, or anything relevant}  
+gcc main.c libftprintf.a
+``` 
 
 ---
-
-🔗 **[⬅ Back to My Profile](https://github.com/AMINJAUW)**  
+**[⬅ Back to My Profile](https://github.com/AMINJAUW)**  
 📬 **Want to reach me? Contact me via GitHub!**

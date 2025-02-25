@@ -1,43 +1,32 @@
-# 📌 **{PROJECT_NAME}**
+# **Fract-ol**  
+### All about fractals visalisation
 
-> **{SHORT_DESCRIPTION}**
+The project here is using a premade library *mlx* that has been added to the project,  
+That enable us to create a window and set the rgb color for each pixel.
 
----
+The idea here is that we take the window as a visulaisation of the *Complex* plane.  
+Then for each coordinate of the plane we check if a given sequence converge or not to 0
+The rate at wich it converge will define the coloration.  
 
-📄 **Project Subject:**  
-[➡️ View en.subject.pdf](./en.subject.pdf)
+See the full [Project Subject](./en.subject.pdf)
+for more details.
 
-## 📥 Installation
+## Installation
 
 ```bash
 make
 ```
 
-## 📝 Usage
+## Usage
 
 Example usage command (modify as needed)
 ```bash
-./{EXECUTABLE_NAME} [OPTIONS]
+./fract-ol mandelbrot
+```
+or
+```bash
+./fract-ol julia
 ```
 
-## 🛠 Features
-
-- 🔹 **{FEATURE_1}**
-- 🔹 **{FEATURE_2}**
-- 🔹 **{FEATURE_3}**
-- *(Add or remove features as needed)*
-
-## 🏆 Achievements
-
-✅ **{If this project was graded, mention the score or any achievements here}**  
-✅ **{Mention any extra functionality or optimizations}**  
-
-## 📌 Additional Notes
-
-- 📜 **Dependencies:** {List any dependencies if applicable}  
-- 📚 **Resources Used:** {Links to documentation, articles, or anything relevant}  
-
----
-
-🔗 **[⬅ Back to My Profile](https://github.com/AMINJAUW)**  
+**[⬅ Back to My Profile](https://github.com/AMINJAUW)**  
 📬 **Want to reach me? Contact me via GitHub!**
