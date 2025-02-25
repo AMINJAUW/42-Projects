@@ -1,43 +1,25 @@
-# 📌 **{PROJECT_NAME}**
+# Raytracing 101, *MiniRT*
 
-> **{SHORT_DESCRIPTION}**
+Using the same library *mlx* the project aims to creat a simple raytracing program. 
+See the full [Project Subject](./en.subject.pdf)
+for more details.
 
----
+A lot of math was used to be able to to do this program.  
+And i leard the hard way about float numbers approximations 
 
-📄 **Project Subject:**  
-[➡️ View en.subject.pdf](./en.subject.pdf)
-
-## 📥 Installation
+## Installation
 
 ```bash
 make
 ```
 
-## 📝 Usage
-
-Example usage command (modify as needed)
+## Usage
+The program runs with config file to set the objects and light in the world.
+Some scenes have already beem made and a script has been made to run them all one after the other
 ```bash
-./{EXECUTABLE_NAME} [OPTIONS]
-```
-
-## 🛠 Features
-
-- 🔹 **{FEATURE_1}**
-- 🔹 **{FEATURE_2}**
-- 🔹 **{FEATURE_3}**
-- *(Add or remove features as needed)*
-
-## 🏆 Achievements
-
-✅ **{If this project was graded, mention the score or any achievements here}**  
-✅ **{Mention any extra functionality or optimizations}**  
-
-## 📌 Additional Notes
-
-- 📜 **Dependencies:** {List any dependencies if applicable}  
-- 📚 **Resources Used:** {Links to documentation, articles, or anything relevant}  
+./miniRT_run.sh
+``` 
 
 ---
-
-🔗 **[⬅ Back to My Profile](https://github.com/AMINJAUW)**  
+**[⬅ Back to My Profile](https://github.com/AMINJAUW)**  
 📬 **Want to reach me? Contact me via GitHub!**

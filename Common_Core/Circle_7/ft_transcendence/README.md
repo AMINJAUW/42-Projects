@@ -1,43 +1,20 @@
-# 📌 **{PROJECT_NAME}**
+# 42 FullStack Gaming Website, Aka Transcendence
 
-> **{SHORT_DESCRIPTION}**
+The objective here is to build a fullstack website using Django and Vanilla JS.  
+See the full [Project Subject](./en.subject.pdf)
+for more details.
 
----
+we have implemented a lot of things
+- blockchain integration
+- user managment
+- and a lot more ...
 
-📄 **Project Subject:**  
-[➡️ View en.subject.pdf](./en.subject.pdf)
-
-## 📥 Installation
-
+## Installation
+need Docker to be able to run it
 ```bash
 make
-```
-
-## 📝 Usage
-
-Example usage command (modify as needed)
-```bash
-./{EXECUTABLE_NAME} [OPTIONS]
-```
-
-## 🛠 Features
-
-- 🔹 **{FEATURE_1}**
-- 🔹 **{FEATURE_2}**
-- 🔹 **{FEATURE_3}**
-- *(Add or remove features as needed)*
-
-## 🏆 Achievements
-
-✅ **{If this project was graded, mention the score or any achievements here}**  
-✅ **{Mention any extra functionality or optimizations}**  
-
-## 📌 Additional Notes
-
-- 📜 **Dependencies:** {List any dependencies if applicable}  
-- 📚 **Resources Used:** {Links to documentation, articles, or anything relevant}  
+``` 
 
 ---
-
-🔗 **[⬅ Back to My Profile](https://github.com/AMINJAUW)**  
+**[⬅ Back to My Profile](https://github.com/AMINJAUW)**  
 📬 **Want to reach me? Contact me via GitHub!**

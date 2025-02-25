@@ -1,43 +1,33 @@
-# 📌 **{PROJECT_NAME}**
+# *Pipex*
 
-> **{SHORT_DESCRIPTION}**
+The objective here is learn about forks pipes and execve  
+See the full [Project Subject](./en.subject.pdf)
+for more details.
 
----
-
-📄 **Project Subject:**  
-[➡️ View en.subject.pdf](./en.subject.pdf)
-
-## 📥 Installation
+## Installation
 
 ```bash
 make
 ```
 
-## 📝 Usage
+## Usage
 
-Example usage command (modify as needed)
+Example usage
 ```bash
-./{EXECUTABLE_NAME} [OPTIONS]
+./pipex file1 cmd1 cmd2 file2
+``` 
+It must take 4 arguments:  
+- file1 and file2 are file names.  
+- cmd1 and cmd2 are shell commands with their parameters  
+
+Example
+```bash
+ ./pipex infile "ls -l" "wc -l" outfile
 ```
-
-## 🛠 Features
-
-- 🔹 **{FEATURE_1}**
-- 🔹 **{FEATURE_2}**
-- 🔹 **{FEATURE_3}**
-- *(Add or remove features as needed)*
-
-## 🏆 Achievements
-
-✅ **{If this project was graded, mention the score or any achievements here}**  
-✅ **{Mention any extra functionality or optimizations}**  
-
-## 📌 Additional Notes
-
-- 📜 **Dependencies:** {List any dependencies if applicable}  
-- 📚 **Resources Used:** {Links to documentation, articles, or anything relevant}  
-
+will behave like 
+```bash
+< infile ls -l | wc -l > outfile
+```
 ---
-
-🔗 **[⬅ Back to My Profile](https://github.com/AMINJAUW)**  
+**[⬅ Back to My Profile](https://github.com/AMINJAUW)**  
 📬 **Want to reach me? Contact me via GitHub!**

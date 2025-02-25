@@ -1,43 +1,14 @@
-# 📌 **{PROJECT_NAME}**
+# First insights into the wonders of c++98
 
-> **{SHORT_DESCRIPTION}**
+The objective here is learn all about classes, hertiage, virtual keyword, ...  
+See the full project info in each module
+for more details.
 
----
-
-📄 **Project Subject:**  
-[➡️ View en.subject.pdf](./en.subject.pdf)
-
-## 📥 Installation
+## Installation fro each sub module
 
 ```bash
 make
 ```
-
-## 📝 Usage
-
-Example usage command (modify as needed)
-```bash
-./{EXECUTABLE_NAME} [OPTIONS]
-```
-
-## 🛠 Features
-
-- 🔹 **{FEATURE_1}**
-- 🔹 **{FEATURE_2}**
-- 🔹 **{FEATURE_3}**
-- *(Add or remove features as needed)*
-
-## 🏆 Achievements
-
-✅ **{If this project was graded, mention the score or any achievements here}**  
-✅ **{Mention any extra functionality or optimizations}**  
-
-## 📌 Additional Notes
-
-- 📜 **Dependencies:** {List any dependencies if applicable}  
-- 📚 **Resources Used:** {Links to documentation, articles, or anything relevant}  
-
 ---
-
-🔗 **[⬅ Back to My Profile](https://github.com/AMINJAUW)**  
+**[⬅ Back to My Profile](https://github.com/AMINJAUW)**  
 📬 **Want to reach me? Contact me via GitHub!**
