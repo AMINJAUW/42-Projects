@@ -1,16 +1,7 @@
-# 42 First project *Libft*
+# 42 Projects repo
 
-The objective here is to build our own C library.  
-See the full [Project Subject](./en.subject.pdf)
-for more details.
-
-
-## Usage
-
-Example usage
-```bash
-gcc main.c libft.c
-``` 
+Here is all my project that i have done thourgh my journey through 42.
+Each project has hisown README.md to explain a bit about it, and how to run it.
 
 ---
 **[⬅ Back to My Profile](https://github.com/AMINJAUW)**  
