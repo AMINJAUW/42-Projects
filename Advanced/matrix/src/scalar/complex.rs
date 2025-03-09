@@ -1,14 +1,24 @@
 use crate::scalar::Scalar;
 use std::ops::{Add, Sub, Mul, Div, Neg, AddAssign, SubAssign, MulAssign, DivAssign};
 
-#[derive(Debug, Clone, Copy, PartialEq, Default)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Complex {
     pub re: f32,
     pub im: f32,
 }
 
 // Implement the Scalar trait for Complex
-impl Scalar for Complex {}
+impl Scalar for Complex {
+    fn unit() -> Self {
+        Complex { re: 1.0f32, im: 1.0f32 }
+    }
+}
+
+impl Default for Complex {
+    fn default() -> Self {
+        Complex { re: 0.0, im: 0.0 }
+    }
+}
 
 impl Add for Complex {
     type Output = Self;
