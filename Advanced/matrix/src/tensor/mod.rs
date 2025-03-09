@@ -1,19 +1,21 @@
 use std::ops::{Add, Index, IndexMut, Mul};
 use crate::Scalar;
 
-pub trait TensorType: Clone + Default + Size {}
+pub trait TensorType: Clone + Default + Size {
+}
 
-impl<T: Scalar> TensorType for T {}
-impl<T: TensorType, const N: usize> TensorType for Tensor<T, N> {}
+impl<T: Scalar> TensorType for T {
+}
+impl<T: TensorType, const N: usize> TensorType for Tensor<T, N> {
+}
 
+impl<T: TensorType + Copy, const N: usize> Copy for Tensor<T, N> where Storage<T, N>: Copy {} //To help rust optimise
 
 #[derive(Debug, Clone)]
-enum Storage<T:TensorType, const N: usize> {
+pub enum Storage<T:TensorType, const N: usize> {
     Stack([T; N]), // Fixed size Stack allocation, optimal but stack overflow risk  
     Heap(Vec<T>), // Stored on the Heap if Needed a lot of space   
 } 
-
-impl<T: TensorType + Copy, const N: usize> Copy for Tensor<T, N> where Storage<T, N>: Copy {}
 
 #[derive(Debug, Clone)]
 pub struct Tensor<T: TensorType, const N: usize> {
@@ -91,132 +93,139 @@ impl<T:TensorType, const N: usize> Size for Tensor<T, N> {
 }
 
 // Implement Add for Tensor (adding two tensors of the same dimension)
-impl<T: TensorType + Add<&T, Output = T>, const N: usize> Add<&Tensor<T, N>> for Tensor<T, N> {
+impl<T: TensorType + Add<Output = T> , const N: usize> Add for &Tensor<T, N> {
     type Output = Tensor<T, N>;
 
-    fn add(self, rhs: &Tensor<T, N>) -> Self::Output {
-        if self.size() != rhs.size() {
-            panic!("Tensors must have the same dimension and size to be added.");
-        }
-
-        let mut result = self;
+    fn add(self, rhs: Self) -> Tensor<T, N> {
+        let mut result = self.clone(); // Clone the Tensor, not the elements
         for i in 0..N {
-            result[i] = self[i] + rhs[i];  // Now we're adding the elements by reference
+            result[i] = self[i].clone() + rhs[i].clone(); // Clone each T to avoid moves, But Rust Will optimes the Clone to Copy
         }
         result
     }
 }
 
 
-// // Implement Mul for Tensor (multiplying tensor by scalar)
-// impl<T: Scalar, const N: usize> Mul<T> for Tensor<T, N> {
-//     type Output = Self;
+// Implement Mul for Tensor (multiplying tensor by scalar)
+impl<T: Scalar, const N: usize> Mul<T> for Tensor<T, N> {
+    type Output = Self;
 
-//     fn mul(self, rhs: T) -> Self {
-//         let mut result = self;
-//         for i in 0..N {
-//             result[i] = self[i] * rhs;
-//         }
-//         result
-//     }
-// }
+    fn mul(self, rhs: T) -> Self {
+        let mut result = self.clone();
+        for i in 0..N {
+            result[i] = self[i] * rhs;
+        }
+        result
+    }
+}
 
-// impl <T:TensorType, const N:usize> Tensor<T,N> {
-//     /// Creates a `sizes.len()` dimensional tensor.
-//     /// - Fills column-first.
-//     /// - If `elements` has fewer elements than needed, fills with `Scalar::unit()`.
-//     /// - If `elements` has more elements, only the required number is used.
-//     pub fn new( sizes: Vec<usize>, elements : Vec<T::Scalar>) -> Tensor<T, N> {
-//         let heap_allocation = sizes.len() > 4 || elements.len() > 1000;
-//         Self::new_high_dim(sizes, elements, heap_allocation)
-//     }
+impl <T:Scalar, const N: usize> Tensor<T,N> {
+    
+}
 
-//     fn new_dim1(size: usize, elements : Vec<T::Scalar>, heap_allocation: bool) -> Tensor<T::Scalar, N> {
-//         let mut stack_data = [T::Scalar::unit(); size];
+impl <T:TensorType, const N:usize> Tensor<T,N> {
+    /// Creates a `sizes.len()` dimensional tensor.
+    /// - Fills column-first.
+    /// - If `elements` has fewer elements than needed, fills with `Scalar::unit()`.
+    /// - If `elements` has more elements, only the required number is used.
+    pub fn new<U:Scalar>( sizes: Vec<usize>, elements : Vec<U>) -> Tensor<T, N> {
+        let heap_allocation = sizes.len() > 4 || elements.len() > 1000;
+        Self::new_high_dim(sizes, elements, heap_allocation)
+    }
 
-//         for i in 0..size {
-//             stack_data[i] = elements.get(i).copied().unwrap_or(T::Scalar::unit());
-//         }
+    fn new_dim1<U: Scalar>(size: usize, elements: Vec<U>, heap_allocation: bool) -> Tensor<U, N> {
+        let mut data = Vec::with_capacity(size);
+    
+        for i in 0..size {
+            data.push(elements.get(i).copied().unwrap_or(U::unit()));
+        }
+    
+        let storage = if heap_allocation {
+            Storage::Heap(data) // Use heap storage if specified
+        } else {
+            // Try to convert the Vec into an array. If it fails, fallback to heap storage
+            match data.try_into() {
+                Ok(array) => Storage::Stack(array), // If successful, use Stack storage
+                Err(_) => Storage::Heap(data),      // If conversion fails, fallback to Heap storage
+            }
+        };
+    
+        Tensor {
+            data: storage,
+            dim: 1,
+        }
 
-//         let storage = if heap_allocation {
-//             Storage::Heap(stack_data.to_vec())
-//         } else {
-//             Storage::Stack(stack_data)
-//         };
-
-//         Tensor { 
-//             data: storage, 
-//             dim: 1 
-//         }
-//     }
+    }
 
 
-//     fn new_high_dim(sizes: Vec<usize>, elements: Vec<T::Scalar>, heap_allocation: bool) -> Tensor<T, N> {
-//         if sizes.is_empty() {
-//             panic!("Tensor must have at least one dimension.");
-//         }
-//         if sizes.len() == 1 {
-//             return Self::new_dim1(sizes[0], elements, heap_allocation);
-//         }
+    fn new_high_dim<U: Scalar>(sizes: Vec<usize>, elements: Vec<U>, heap_allocation: bool) -> Tensor<T, N> {
+        if sizes.is_empty() {
+            panic!("Tensor must have at least one dimension.");
+        }
+        if sizes.len() == 1 {
+            return Self::new_dim1(sizes[0], elements, heap_allocation);
+        }
 
-//         let sub_tensor_count = sizes[0]; // Number of subtensors at this level
-//         let remaining_sizes = &sizes[1..]; // Remaining sizes for subtensors
+        let sub_tensor_count = sizes[0]; // Number of subtensors at this level
+        let remaining_sizes = &sizes[1..]; // Remaining sizes for subtensors
 
-//         let sub_tensor_size = remaining_sizes.iter().product(); // Elements in each sub-tensor
+        let sub_tensor_size = remaining_sizes.iter().product(); // Elements in each sub-tensor
 
-//         let data = if heap_allocation {
-//             Self::heap_sub_tensors(sub_tensor_count, sub_tensor_size, remaining_sizes, &elements)
-//         } else {
-//             Self::stack_sub_tensors(sub_tensor_count, sub_tensor_size, remaining_sizes, &elements)
-//         };
+        let data = if heap_allocation {
+            Self::heap_sub_tensors(sub_tensor_count, sub_tensor_size, remaining_sizes, &elements)
+        } else {
+            Self::stack_sub_tensors(sub_tensor_count, sub_tensor_size, remaining_sizes, &elements)
+        };
 
-//         Tensor { 
-//             data, 
-//             dim: sizes.len(),
-//         }
-//     }
+        Tensor { 
+            data, 
+            dim: sizes.len(),
+        }
+    }
 
-//     fn heap_sub_tensors(
-//         sub_tensor_count: usize,
-//         sub_tensor_size: usize,
-//         remaining_sizes: &[usize],
-//         elements: &[T::Scalar],
-//     ) -> Storage<T, N> {
+    fn heap_sub_tensors<U: Scalar>(
+        sub_tensor_count: usize,
+        sub_tensor_size: usize,
+        remaining_sizes: &[usize],
+        elements: &[U],
+    ) -> Storage<T, N> {
 
-//         let mut heap_data = Vec::with_capacity(sub_tensor_count);
+        let mut heap_data = Vec::with_capacity(sub_tensor_count);
 
-//         for i in 0..sub_tensor_count {
-//             let start_idx = i * sub_tensor_size;
-//             let end_idx = (i + 1) * sub_tensor_size;
-//             let sub_elements = if end_idx > elements.len() {
-//                 elements[start_idx..].to_vec() // Return all elements from start_idx to the end of the vector
-//             } else {
-//                 elements[start_idx..end_idx].to_vec() // Normal case: Slice the elements from start_idx to end_idx
-//             };
-//             heap_data.push(Self::new_high_dim(remaining_sizes.to_vec(), sub_elements, true));
-//         }
-//         Storage::Heap(heap_data)
-//     }
+        for i in 0..sub_tensor_count {
+            let start_idx = i * sub_tensor_size;
+            let end_idx = (i + 1) * sub_tensor_size;
+            let sub_elements = if end_idx > elements.len() {
+                elements[start_idx..].to_vec() // Return all elements from start_idx to the end of the vector
+            } else {
+                elements[start_idx..end_idx].to_vec() // Normal case: Slice the elements from start_idx to end_idx
+            };
+            heap_data.push(Self::new_high_dim(remaining_sizes.to_vec(), sub_elements, true));
+        }
+        Storage::Heap(heap_data)
+    }
 
-//     fn stack_sub_tensors(
-//         sub_tensor_count: usize,
-//         sub_tensor_size: usize,
-//         remaining_sizes: &[usize],
-//         elements: &[T::Scalar],
-//     ) -> Storage<T, N> {
+    fn stack_sub_tensors<U: Scalar>(
+        sub_tensor_count: usize,
+        sub_tensor_size: usize,
+        remaining_sizes: &[usize],
+        elements: &[U],
+    ) -> Storage<T, N> {
 
-//         let mut stack_data = [Self::default(); sub_tensor_count];
+        let mut stack_data = Vec::with_capacity(sub_tensor_count);
 
-//         for i in 0..sub_tensor_count.min(N) {
-//             let start_idx = i * sub_tensor_size;
-//             let end_idx = (i + 1) * sub_tensor_size;
-//             let sub_elements = elements.get(start_idx..end_idx).unwrap_or(&[]).to_vec();
-//             stack_data[i] = Self::new_high_dim(remaining_sizes.to_vec(), sub_elements, false);
-//         }
-//         Storage::Stack(stack_data)
-//     }
-		
-// }
+        for i in 0..sub_tensor_count.min(N) {
+            let start_idx = i * sub_tensor_size;
+            let end_idx = (i + 1) * sub_tensor_size;
+            let sub_elements = elements.get(start_idx..end_idx).unwrap_or(&[]).to_vec();
+            stack_data.push(Self::new_high_dim(remaining_sizes.to_vec(), sub_elements, false));
+        }
+        match stack_data.try_into() {
+            Ok(array) => Storage::Stack(array), // If successful, use Stack storage
+            Err(_) => Storage::Heap(stack_data),      // If conversion fails, fallback to Heap storage
+        }
+    }
+}
 
 
 // #[cfg(test)]
