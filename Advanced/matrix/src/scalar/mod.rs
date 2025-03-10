@@ -1,8 +1,9 @@
 pub mod complex;
 
+use core::fmt;
 use std::ops::{Add, Sub, Mul, Div, Neg, AddAssign, SubAssign, MulAssign, DivAssign};
 
-pub trait Scalar:
+pub trait ScalarTrait:
     Copy
     + Clone
     + Add<Output = Self>
@@ -16,6 +17,7 @@ pub trait Scalar:
     + DivAssign
     + Neg<Output = Self>
     + Default
+    + fmt::Display
 {
     fn unit() -> Self;
     fn size(&self) -> Vec<usize> {
@@ -23,7 +25,7 @@ pub trait Scalar:
     }
 }
 
-impl Scalar for f32 {
+impl ScalarTrait for f32 {
     fn unit() -> Self {
         1.0f32
     }

@@ -1,105 +1,85 @@
 use std::ops::{Add, Index, IndexMut, Mul};
-use crate::Scalar;
-
-pub trait TensorType: Clone + Default + Size {
-}
-
-impl<T: Scalar> TensorType for T {
-}
-impl<T: TensorType, const N: usize> TensorType for Tensor<T, N> {
-}
-
-impl<T: TensorType + Copy, const N: usize> Copy for Tensor<T, N> where Storage<T, N>: Copy {} //To help rust optimise
+use core::fmt;
+use crate::ScalarTrait;
 
 #[derive(Debug, Clone)]
-pub enum Storage<T:TensorType, const N: usize> {
-    Stack([T; N]), // Fixed size Stack allocation, optimal but stack overflow risk  
-    Heap(Vec<T>), // Stored on the Heap if Needed a lot of space   
-} 
+pub enum Element<T:ScalarTrait> {
+    Scalar(T),
+    Tensor(Box<Tensor<T>>)
+}
 
-#[derive(Debug, Clone)]
-pub struct Tensor<T: TensorType, const N: usize> {
-    pub data: Storage<T,N>,
+#[derive(Clone)]
+pub struct Tensor<T: ScalarTrait> 
+{
+    pub data: Vec<Element<T>>,
     dim: usize,
 }
 
-impl<T: TensorType, const N: usize> Index<usize> for Tensor<T, N> {
-    type Output = T;
+impl<T: ScalarTrait> Index<usize> for Tensor<T> {
+    type Output = Element<T>;
 
     fn index(&self, index: usize) -> &Self::Output {
-        if index >= N {
-            panic!("Out of bounds indexing for a Tensor");
-        }
-        match &self.data {
-            Storage::Stack(data) => &data[index],
-            Storage::Heap(data) => &data[index],
-        }
+        &self.data[index]
     }
 }
 
-impl<T: TensorType, const N: usize> IndexMut<usize> for Tensor<T, N> {
+impl<T: ScalarTrait> IndexMut<usize> for Tensor<T> {
+
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-        if index >= N {
-            panic!("Out of bounds indexing for a Tensor");
-        }
-        match &mut self.data {
-            Storage::Stack(data) => &mut data[index],
-            Storage::Heap(data) => &mut data[index],
-        }
+        &mut self.data[index]
     }
 }
 
-impl<T:TensorType, const N: usize> Default for Tensor<T, N> {
-    /// After Carefull consideration it is better to lose some optimisation  
-    /// by using the heap because in case of a very big N with high dim the stack could overflow.
-    /// And on The Heap we can only use one element per dimension.
-    /// the T::default will call the innertype default value
+impl<T:ScalarTrait> Default for Tensor<T> {
     fn default() -> Self {
-        let data = Storage::Heap(vec![T::default()]);
-        Tensor { data: data, dim: 0 }
+        Tensor { 
+            data: vec![Element::Scalar(T::unit())], 
+            dim: 1,
+        }
     }
 }
 
-pub trait Size {
-    fn size(&self) -> Vec<usize>;
-}
-
-impl<T: Scalar> Size for T {
-    fn size(&self) -> Vec<usize> {
-        vec![]  // Scalars have no dimensions
-    }
-}
-
-impl<T:TensorType, const N: usize> Size for Tensor<T, N> {
-    fn size(&self) -> Vec<usize> {
-        let mut sizes = vec![];
+impl<T:ScalarTrait> Tensor<T> {
+    pub fn size(&self) -> Vec<usize> {
+        let mut sizes = Vec::with_capacity(self.dim);
 
         // Get the size of the outer container (either stack or heap)
-        sizes.push(
-            match &self.data {
-                Storage::Heap(vec) => vec.len(),
-                Storage::Stack(arr) => arr.len(),
-            }
-        );
-
-        // If the tensor is not scalar (i.e., it has sub-tensors), calculate recursively
-        if self.dim > 1 {
-            // Here, we assume self[0] is a sub-tensor
-            let sub_tensor = &self[0]; // Borrowing the first element (sub-tensor)
-            sizes.extend(sub_tensor.size());  // Recursively call size()
+        sizes.push(self.data.len());
+        if self.data.len() == 0 {
+            return sizes;
         }
-        sizes
+        match &self.data[0] {
+            Element::Scalar(_) => sizes,
+            Element::Tensor(tensor) => {
+                sizes.extend(tensor.size());
+                sizes
+            }
+        }
     }
 }
 
 // Implement Add for Tensor (adding two tensors of the same dimension)
-impl<T: TensorType + Add<Output = T> , const N: usize> Add for &Tensor<T, N> {
-    type Output = Tensor<T, N>;
+impl<T: ScalarTrait> Add for Tensor<T> 
+{
+    type Output = Tensor<T>;
 
-    fn add(self, rhs: Self) -> Tensor<T, N> {
+    fn add(self, rhs: Self) -> Tensor<T> {
+        if self.data.len() != rhs.data.len() {
+            !panic!("Trying to Add 2 tensors of different sizes");
+        }
+
         let mut result = self.clone(); // Clone the Tensor, not the elements
-        for i in 0..N {
-            result[i] = self[i].clone() + rhs[i].clone(); // Clone each T to avoid moves, But Rust Will optimes the Clone to Copy
+        for i in 0..self.data.len() {
+
+            match (&self.data[i], &rhs.data[i]) {
+                (Element::Scalar(left), Element::Scalar(right)) => { 
+                    result[i] = Element::Scalar(*left + *right)
+                },
+                (Element::Tensor(left), Element::Tensor(right)) => {
+                    result[i] = Element::Tensor(Box::new(*left.clone() + *right.clone()))
+                },
+                _ => {unreachable!()}
+            }
         }
         result
     }
@@ -107,219 +87,304 @@ impl<T: TensorType + Add<Output = T> , const N: usize> Add for &Tensor<T, N> {
 
 
 // Implement Mul for Tensor (multiplying tensor by scalar)
-impl<T: Scalar, const N: usize> Mul<T> for Tensor<T, N> {
+impl<T: ScalarTrait> Mul<T> for Tensor<T> 
+{
     type Output = Self;
 
     fn mul(self, rhs: T) -> Self {
         let mut result = self.clone();
-        for i in 0..N {
-            result[i] = self[i] * rhs;
+        for i in 0..self.data.len() {
+            match &self.data[i] {
+                Element::Scalar(left) => { 
+                    result[i] = Element::Scalar(*left * rhs)
+                },
+                Element::Tensor(left) => {
+                    result[i] = Element::Tensor(Box::new(*left.clone() * rhs))
+                },
+            }
         }
         result
     }
 }
 
-impl <T:Scalar, const N: usize> Tensor<T,N> {
-    
-}
+impl <T:ScalarTrait> Tensor<T> {
 
-impl <T:TensorType, const N:usize> Tensor<T,N> {
-    /// Creates a `sizes.len()` dimensional tensor.
-    /// - Fills column-first.
-    /// - If `elements` has fewer elements than needed, fills with `Scalar::unit()`.
-    /// - If `elements` has more elements, only the required number is used.
-    pub fn new<U:Scalar>( sizes: Vec<usize>, elements : Vec<U>) -> Tensor<T, N> {
-        let heap_allocation = sizes.len() > 4 || elements.len() > 1000;
-        Self::new_high_dim(sizes, elements, heap_allocation)
-    }
-
-    fn new_dim1<U: Scalar>(size: usize, elements: Vec<U>, heap_allocation: bool) -> Tensor<U, N> {
-        let mut data = Vec::with_capacity(size);
-    
-        for i in 0..size {
-            data.push(elements.get(i).copied().unwrap_or(U::unit()));
-        }
-    
-        let storage = if heap_allocation {
-            Storage::Heap(data) // Use heap storage if specified
-        } else {
-            // Try to convert the Vec into an array. If it fails, fallback to heap storage
-            match data.try_into() {
-                Ok(array) => Storage::Stack(array), // If successful, use Stack storage
-                Err(_) => Storage::Heap(data),      // If conversion fails, fallback to Heap storage
-            }
-        };
-    
-        Tensor {
-            data: storage,
-            dim: 1,
-        }
-
-    }
-
-
-    fn new_high_dim<U: Scalar>(sizes: Vec<usize>, elements: Vec<U>, heap_allocation: bool) -> Tensor<T, N> {
+    pub fn new(sizes: Vec<usize>, elements : Vec<T>) -> Tensor<T> {
         if sizes.is_empty() {
             panic!("Tensor must have at least one dimension.");
         }
+
         if sizes.len() == 1 {
-            return Self::new_dim1(sizes[0], elements, heap_allocation);
-        }
-
-        let sub_tensor_count = sizes[0]; // Number of subtensors at this level
-        let remaining_sizes = &sizes[1..]; // Remaining sizes for subtensors
-
-        let sub_tensor_size = remaining_sizes.iter().product(); // Elements in each sub-tensor
-
-        let data = if heap_allocation {
-            Self::heap_sub_tensors(sub_tensor_count, sub_tensor_size, remaining_sizes, &elements)
+            Self::new_dim1(sizes[0], elements)
         } else {
-            Self::stack_sub_tensors(sub_tensor_count, sub_tensor_size, remaining_sizes, &elements)
-        };
+            let sub_tensor_count = sizes[0]; // Number of subtensors at this level
+            let remaining_sizes = sizes[1..].to_vec(); // Remaining sizes for subtensors
 
-        Tensor { 
-            data, 
-            dim: sizes.len(),
+            let sub_tensor_size: usize = remaining_sizes.clone().iter().product(); // number of Elements in each sub-tensor
+
+            let mut data = Vec::with_capacity(sub_tensor_count);
+
+            for i in 0..sub_tensor_count {
+                let start_idx = i * sub_tensor_size;
+                let end_idx = (i + 1) * sub_tensor_size;
+                let sub_elements = if start_idx > elements.len() {
+                        vec![]
+                    } else if end_idx > elements.len() {
+                        elements[start_idx..].to_vec() // Return all elements from start_idx to the end of the vector
+                    } else {
+                        elements[start_idx..end_idx].to_vec() // Normal case: Slice the elements from start_idx to end_idx
+                    };
+                data.push(Element::Tensor(Box::new(Self::new(remaining_sizes.clone(), sub_elements))));
+            }
+            Tensor {
+                data: data,
+                dim: sizes.len()
+            }
         }
     }
 
-    fn heap_sub_tensors<U: Scalar>(
-        sub_tensor_count: usize,
-        sub_tensor_size: usize,
-        remaining_sizes: &[usize],
-        elements: &[U],
-    ) -> Storage<T, N> {
-
-        let mut heap_data = Vec::with_capacity(sub_tensor_count);
-
-        for i in 0..sub_tensor_count {
-            let start_idx = i * sub_tensor_size;
-            let end_idx = (i + 1) * sub_tensor_size;
-            let sub_elements = if end_idx > elements.len() {
-                elements[start_idx..].to_vec() // Return all elements from start_idx to the end of the vector
-            } else {
-                elements[start_idx..end_idx].to_vec() // Normal case: Slice the elements from start_idx to end_idx
-            };
-            heap_data.push(Self::new_high_dim(remaining_sizes.to_vec(), sub_elements, true));
+    fn new_dim1(size: usize, elements: Vec<T>) -> Tensor<T> {
+        let mut data: Vec<Element<T>> = Vec::with_capacity(size);
+    
+        for i in 0..size {
+            data.push(Element::Scalar(*elements.get(i).unwrap_or(&T::unit())));
         }
-        Storage::Heap(heap_data)
-    }
-
-    fn stack_sub_tensors<U: Scalar>(
-        sub_tensor_count: usize,
-        sub_tensor_size: usize,
-        remaining_sizes: &[usize],
-        elements: &[U],
-    ) -> Storage<T, N> {
-
-        let mut stack_data = Vec::with_capacity(sub_tensor_count);
-
-        for i in 0..sub_tensor_count.min(N) {
-            let start_idx = i * sub_tensor_size;
-            let end_idx = (i + 1) * sub_tensor_size;
-            let sub_elements = elements.get(start_idx..end_idx).unwrap_or(&[]).to_vec();
-            stack_data.push(Self::new_high_dim(remaining_sizes.to_vec(), sub_elements, false));
-        }
-        match stack_data.try_into() {
-            Ok(array) => Storage::Stack(array), // If successful, use Stack storage
-            Err(_) => Storage::Heap(stack_data),      // If conversion fails, fallback to Heap storage
+        Tensor {
+            data: data,
+            dim: 1,
         }
     }
 }
 
+impl<T: ScalarTrait> fmt::Display for Tensor<T> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 
-// #[cfg(test)]
-// mod tests {
-//     use super::*;
-//     use crate::Complex;
+        fn print_tensor<T: ScalarTrait>(tensor: &Tensor<T>, indices: &mut Vec<usize>, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            let dims = tensor.size();
+            if dims.len() == 1 {
+                // 1D Tensor: Print as vertical vector
+                for i in 0..tensor.data.len() {
+                    if let Element::Scalar(val) = tensor.data[i] {
+                            writeln!(f, "{}", val)?;
+                    }
+                }
+            } else if dims.len() == 2 {
+                // 2D Tensor: Print as a column-based matrix
+                let rows = dims[0];
+                let cols = dims[1];
+                
+                for c in 0..cols {
+                    write!(f, "| ")?;
+                    for r in 0..rows {
+                        if let Element::Tensor(col) = &tensor.data[r] {
+                            if let Element::Scalar(val) = col[c] {
+                                write!(f, "{:>8} ", val)?;
+                            }
+                        }
+                    }
+                    writeln!(f, " |")?;
+                }
+            } else {
+                // 3D+ Tensor: Print multiple matrices with indices
+                for i in 0..tensor.data.len() {
+                    indices.push(i);
+                    writeln!(f, "{:?}\n", indices)?;
+                    if let Element::Tensor(sub_tensor) = &tensor[i] {
+                        print_tensor(sub_tensor, indices, f)?;
+                    }
+                    writeln!(f, "{}", "_".repeat(30))?;
+                    indices.pop();
+                }
+            }
+            Ok(())
+        }
+
+        let mut indices = Vec::new();
+        print_tensor(self, &mut indices, f)
+    }
+}
+
+impl<T: ScalarTrait + fmt::Debug> fmt::Debug for Tensor<T> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        // Indentation level counter
+        fn indent(level: usize) -> String {
+            "  ".repeat(level)
+        }
+
+        // Helper function to format nested tensors recursively
+        fn format_tensor<T: ScalarTrait + fmt::Debug>(tensor: &Tensor<T>, level: usize, f: &mut fmt::Formatter) -> fmt::Result {
+            writeln!(f, "{}Tensor {{", indent(level))?;
+            writeln!(f, "{}data: [", indent(level + 1))?;
+
+            // Increase indentation for elements inside the data
+            for elem in &tensor.data {
+                match elem {
+                    Element::Tensor(sub_tensor) => {
+                        // Format nested tensors recursively
+                        format_tensor(sub_tensor, level + 2, f)?;
+                    }
+                    Element::Scalar(val) => {
+                        // Format scalar values with proper indentation
+                        writeln!(f, "{}{:?},", indent(level + 2), val)?;
+                    }
+                }
+            }
+
+            writeln!(f, "{}}},", indent(level + 1))?;
+            writeln!(f, "{}}},", indent(level))?;
+            Ok(())
+        }
+
+        // Begin formatting the root tensor
+        writeln!(f, "Tensor {{")?;
+        format_tensor(self, 1, f)?;
+        writeln!(f, "}}")
+    }
+}
 
 
-//     // A helper function to create a tensor of f32
-//     fn create_tensor_f32(data: [f32; 3], dim: usize) -> Tensor<f32, 3> {
-//         Tensor { data, dim }
-//     }
 
-//     // A helper function to create a tensor of Complex
-//     fn create_tensor_complex(data: [Complex; 3], dim: usize) -> Tensor<Complex, 3> {
-//         Tensor { data, dim }
-//     }
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::Complex;
 
-//     #[test]
-//     fn test_add_tensors_f32() {
-//         let tensor1 = create_tensor_f32([1.0, 2.0, 3.0], 1);
-//         let tensor2 = create_tensor_f32([4.0, 5.0, 6.0], 1);
-        
-//         // Adding two tensors
-//         let result = tensor1 + tensor2;
-        
-//         assert_eq!(result.data, [5.0, 7.0, 9.0]);
-//     }
+    // Helper function to generate a vector of increasing f32 values
+    fn generate_f32_sequence(len: usize) -> Vec<f32> {
+        (0..len).map(|x| x as f32).collect()
+    }
 
-//     #[test]
-//     #[should_panic(expected = "Tensors must have the same dimension and size to be added.")]
-//     fn test_add_tensors_f32_mismatched_dims() {
-//         let tensor1 = create_tensor_f32([1.0, 2.0, 3.0], 1);
-//         let tensor2 = create_tensor_f32([1.0, 2.0, 3.0], 2);
-        
-//         // This will panic because the dimensions don't match
-//         let _ = tensor1 + tensor2;
-//     }
+    // Helper function to generate a vector of increasing Complex numbers
+    fn generate_complex_sequence(len: usize) -> Vec<Complex> {
+        (0..len)
+            .map(|x| Complex { re: x as f32, im: (x as f32) * 2.0 })
+            .collect()
+    }
 
-//     #[test]
-//     fn test_mul_tensor_by_scalar_f32() {
-//         let tensor = create_tensor_f32([1.0, 2.0, 3.0], 1);
-//         let scalar = 2.0;
-        
-//         // Multiplying tensor by scalar
-//         let result = tensor * scalar;
-        
-//         assert_eq!(result.data, [2.0, 4.0, 6.0]);
-//     }
+    #[test]
+    fn test_tensor_creation_f32() {
+        let sizes = vec![2, 2]; // 2x2 tensor
+        let elements = generate_f32_sequence(4);
+        let tensor = Tensor::new(sizes, elements);
 
-//     #[test]
-//     fn test_add_tensors_complex() {
-//         let tensor1 = create_tensor_complex(
-//             [Complex { re: 1.0, im: 1.0 }, Complex { re: 2.0, im: 2.0 }, Complex { re: 3.0, im: 3.0 }],
-//             1,
-//         );
-//         let tensor2 = create_tensor_complex(
-//             [Complex { re: 4.0, im: 4.0 }, Complex { re: 5.0, im: 5.0 }, Complex { re: 6.0, im: 6.0 }],
-//             1,
-//         );
-        
-//         // Adding two tensors of Complex numbers
-//         let result = tensor1 + tensor2;
-        
-//         assert_eq!(
-//             result.data,
-//             [
-//                 Complex { re: 5.0, im: 5.0 },
-//                 Complex { re: 7.0, im: 7.0 },
-//                 Complex { re: 9.0, im: 9.0 }
-//             ]
-//         );
-//     }
+        assert_eq!(tensor.size(), vec![2, 2]); // Ensure dimensions match
+    }
 
-//     #[test]
-//     fn test_mul_tensor_by_scalar_complex() {
-//         let tensor = create_tensor_complex(
-//             [Complex { re: 1.0, im: 1.0 }, Complex { re: 2.0, im: 2.0 }, Complex { re: 3.0, im: 3.0 }],
-//             1,
-//         );
-//         let scalar = Complex { re: 2.0, im: 2.0 };
-        
-//         // Multiplying tensor by a scalar (Complex number)
-//         let result = tensor * scalar;
-        
-//         assert_eq!(
-//             result.data,
-//             [
-//                 Complex { re: 0.0, im: 4.0 },
-//                 Complex { re: 0.0, im: 8.0 },
-//                 Complex { re: 0.0, im: 12.0 }
-//             ]
-//         );
-//     }
+    #[test]
+    fn test_tensor_creation_complex() {
+        let sizes = vec![2, 3]; // 2x3 tensor
+        let elements = generate_complex_sequence(6);
+        let tensor = Tensor::new(sizes, elements);
 
-// }
+        assert_eq!(tensor.size(), vec![2, 3]); // Ensure dimensions match
+    }
 
+    #[test]
+    fn test_indexing_f32() {
+        let sizes = vec![2, 2];
+        let elements = generate_f32_sequence(4);
+        let tensor = Tensor::new(sizes, elements);
+
+        match &tensor[0] {
+            Element::Tensor(sub_tensor) => match &sub_tensor[1] {
+                Element::Scalar(value) => assert_eq!(*value, 1.0),
+                _ => panic!("Unexpected type"),
+            },
+            _ => panic!("Unexpected type"),
+        }
+    }
+
+    #[test]
+    fn test_indexing_complex() {
+        let sizes = vec![2, 2];
+        let elements = generate_complex_sequence(4);
+        let tensor = Tensor::new(sizes, elements);
+
+        match &tensor[1] {
+            Element::Tensor(sub_tensor) => match &sub_tensor[0] {
+                Element::Scalar(value) => {
+                    assert_eq!(value.re, 2.0);
+                    assert_eq!(value.im, 4.0);
+                }
+                _ => panic!("Unexpected type"),
+            },
+            _ => panic!("Unexpected type"),
+        }
+    }
+
+    #[test]
+    fn test_addition_f32() {
+        let sizes = vec![2, 2];
+        let elements = generate_f32_sequence(4);
+        let tensor1 = Tensor::new(sizes.clone(), elements.clone());
+        let tensor2 = Tensor::new(sizes, elements);
+
+        let result = tensor1.clone() + tensor2;
+
+        match &result[0] {
+            Element::Tensor(sub_tensor) => match &sub_tensor[1] {
+                Element::Scalar(value) => assert_eq!(*value, 2.0),
+                _ => panic!("Unexpected type"),
+            },
+            _ => panic!("Unexpected type"),
+        }
+    }
+
+    #[test]
+    fn test_addition_complex() {
+        let sizes = vec![2, 2];
+        let elements = generate_complex_sequence(4);
+        let tensor1 = Tensor::new(sizes.clone(), elements.clone());
+        let tensor2 = Tensor::new(sizes, elements);
+
+        let result = tensor1.clone() + tensor2;
+
+        match &result[1] {
+            Element::Tensor(sub_tensor) => match &sub_tensor[0] {
+                Element::Scalar(value) => {
+                    assert_eq!(value.re, 4.0);
+                    assert_eq!(value.im, 8.0);
+                }
+                _ => panic!("Unexpected type"),
+            },
+            _ => panic!("Unexpected type"),
+        }
+    }
+
+    #[test]
+    fn test_multiplication_f32() {
+        let sizes = vec![2, 2];
+        let elements = generate_f32_sequence(4);
+        let tensor = Tensor::new(sizes, elements);
+
+        let result = tensor.clone() * 2.0;
+
+        match &result[0] {
+            Element::Tensor(sub_tensor) => match &sub_tensor[1] {
+                Element::Scalar(value) => assert_eq!(*value, 2.0),
+                _ => panic!("Unexpected type"),
+            },
+            _ => panic!("Unexpected type"),
+        }
+    }
+
+    #[test]
+    fn test_multiplication_complex() {
+        let sizes = vec![2, 2];
+        let elements = generate_complex_sequence(4);
+        let tensor = Tensor::new(sizes, elements);
+
+        let result = tensor.clone() * Complex { re: 2.0, im: 0.0 };
+
+        match &result[1] {
+            Element::Tensor(sub_tensor) => match &sub_tensor[0] {
+                Element::Scalar(value) => {
+                    assert_eq!(value.re, 4.0);
+                    assert_eq!(value.im, 8.0);
+                }
+                _ => panic!("Unexpected type"),
+            },
+            _ => panic!("Unexpected type"),
+        }
+    }
+}

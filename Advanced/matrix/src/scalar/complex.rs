@@ -1,4 +1,5 @@
-use crate::scalar::Scalar;
+use crate::ScalarTrait;
+use core::fmt;
 use std::ops::{Add, Sub, Mul, Div, Neg, AddAssign, SubAssign, MulAssign, DivAssign};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -8,7 +9,7 @@ pub struct Complex {
 }
 
 // Implement the Scalar trait for Complex
-impl Scalar for Complex {
+impl ScalarTrait for Complex {
     fn unit() -> Self {
         Complex { re: 1.0f32, im: 1.0f32 }
     }
@@ -17,6 +18,16 @@ impl Scalar for Complex {
 impl Default for Complex {
     fn default() -> Self {
         Complex { re: 0.0, im: 0.0 }
+    }
+}
+
+impl fmt::Display for Complex {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if self.im >= 0.0 {
+            write!(f, "({} + {}i)", self.re, self.im)
+        } else {
+            write!(f, "({} - {}i)", self.re, -self.im)
+        }
     }
 }
 
