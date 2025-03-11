@@ -4,6 +4,8 @@ pub use complex::Complex;
 use core::fmt;
 use std::ops::{Add, Sub, Mul, Div, Neg, AddAssign, SubAssign, MulAssign, DivAssign};
 
+
+
 pub trait ScalarTrait:
     Copy
     + Clone
@@ -21,13 +23,14 @@ pub trait ScalarTrait:
     + fmt::Display
 {
     fn unit() -> Self;
-    fn size(&self) -> Vec<usize> {
-        vec![] // Scalars have no dimensions
-    }
+    fn mul_add(self, a: Self, b: Self) -> Self;
 }
 
 impl ScalarTrait for f32 {
     fn unit() -> Self {
         1.0f32
+    }
+    fn mul_add(self, a: Self, b: Self) -> Self {
+        self.mul_add(a, b)
     }
 }

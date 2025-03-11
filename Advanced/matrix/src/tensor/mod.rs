@@ -2,6 +2,8 @@ use crate::ScalarTrait;
 pub mod basic_arithmetic;
 pub mod display_debug;
 pub mod index;
+pub mod linear_combination;
+pub use linear_combination::linear_combination;
 
 
 #[derive(Debug, Clone)]

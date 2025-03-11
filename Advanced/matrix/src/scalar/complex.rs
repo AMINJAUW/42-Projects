@@ -13,6 +13,14 @@ impl ScalarTrait for Complex {
     fn unit() -> Self {
         Complex { re: 1.0f32, im: 1.0f32 }
     }
+    /// (z0 * z1) + z2
+    /// = (z0.re * z1.re - z0.im * z1.im + z2.re) + (z0.re * z1.im + z0.im * z1.re + z2.im)i 
+    fn mul_add(self, a: Self, b: Self) -> Self {
+        Complex { 
+            re: self.re.mul_add(a.re, -self.im.mul_add(a.im, b.re)),
+            im: self.re.mul_add(a.im,  self.im.mul_add(a.re, b.im)),
+        }
+    }
 }
 
 impl Default for Complex {
