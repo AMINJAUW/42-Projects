@@ -1,4 +1,4 @@
-use std::ops::{Add, Mul};
+use std::ops::{Add, Mul, Sub};
 
 use crate::{scalar::ScalarTrait, tensor::Tensor, Vector};
 
@@ -7,6 +7,14 @@ impl<T:ScalarTrait> Add for Vector<T> {
 
 	fn add(self, rhs: Self) -> Self::Output {
 		Vector(self.0 + rhs.0)
+	}
+}
+
+impl<T:ScalarTrait> Sub for Vector<T> {
+	type Output = Vector<T>;
+
+	fn sub(self, rhs: Self) -> Self::Output {
+		Vector(self.0 - rhs.0)
 	}
 }
 
