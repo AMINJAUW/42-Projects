@@ -1,4 +1,5 @@
 pub mod complex;
+pub use complex::Complex;
 
 use core::fmt;
 use std::ops::{Add, Sub, Mul, Div, Neg, AddAssign, SubAssign, MulAssign, DivAssign};

@@ -3,8 +3,11 @@ pub mod vector;
 pub mod matrix;
 pub mod tensor;
 
-use scalar::ScalarTrait;
-use scalar::complex::Complex;
-use tensor::Tensor;
+pub use scalar::ScalarTrait;
+pub use vector::Vector;
+pub use matrix::Matrix;
+pub use scalar::Complex;
+pub use tensor::Tensor;
+pub use tensor::Element;
 
 // use vector::Vector;
