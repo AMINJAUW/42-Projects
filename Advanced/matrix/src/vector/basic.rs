@@ -2,32 +2,32 @@ use std::ops::{Add, Mul, Sub};
 
 use crate::{scalar::ScalarTrait, tensor::Tensor, Vector};
 
-impl<T:ScalarTrait> Add for Vector<T> {
-	type Output = Vector<T>;
+impl<T: ScalarTrait> Add for Vector<T> {
+    type Output = Vector<T>;
 
-	fn add(self, rhs: Self) -> Self::Output {
-		Vector(self.0 + rhs.0)
-	}
+    fn add(self, rhs: Self) -> Self::Output {
+        Vector(self.0 + rhs.0)
+    }
 }
 
-impl<T:ScalarTrait> Sub for Vector<T> {
-	type Output = Vector<T>;
+impl<T: ScalarTrait> Sub for Vector<T> {
+    type Output = Vector<T>;
 
-	fn sub(self, rhs: Self) -> Self::Output {
-		Vector(self.0 - rhs.0)
-	}
+    fn sub(self, rhs: Self) -> Self::Output {
+        Vector(self.0 - rhs.0)
+    }
 }
 
-impl<T:ScalarTrait> Mul<T> for Vector<T> {
-	type Output = Vector<T>;
+impl<T: ScalarTrait> Mul<T> for Vector<T> {
+    type Output = Vector<T>;
 
-	fn mul(self, rhs: T) -> Self::Output {
-		Vector(self.0 * rhs)
-	}
+    fn mul(self, rhs: T) -> Self::Output {
+        Vector(self.0 * rhs)
+    }
 }
 
-impl<T:ScalarTrait> Default for Vector<T> {
-	fn default() -> Self {
-		Vector(Tensor::default())
-	}
+impl<T: ScalarTrait> Default for Vector<T> {
+    fn default() -> Self {
+        Vector(Tensor::default())
+    }
 }

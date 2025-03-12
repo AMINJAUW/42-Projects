@@ -1,23 +1,26 @@
-use crate::{ScalarTrait, Tensor, Element};
+use crate::{Element, ScalarTrait, Tensor};
 use core::fmt;
 
 impl<T: ScalarTrait> fmt::Display for Tensor<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-
-        fn print_tensor<T: ScalarTrait>(tensor: &Tensor<T>, indices: &mut Vec<usize>, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fn print_tensor<T: ScalarTrait>(
+            tensor: &Tensor<T>,
+            indices: &mut Vec<usize>,
+            f: &mut fmt::Formatter<'_>,
+        ) -> fmt::Result {
             let dims = tensor.size();
             if dims.len() == 1 {
                 // 1D Tensor: Print as vertical vector
                 for i in 0..tensor.data.len() {
                     if let Element::Scalar(val) = tensor.data[i] {
-                            writeln!(f, "{}", val)?;
+                        writeln!(f, "{}", val)?;
                     }
                 }
             } else if dims.len() == 2 {
                 // 2D Tensor: Print as a column-based matrix
                 let rows = dims[0];
                 let cols = dims[1];
-                
+
                 for c in 0..cols {
                     write!(f, "| ")?;
                     for r in 0..rows {
@@ -57,7 +60,11 @@ impl<T: ScalarTrait + fmt::Debug> fmt::Debug for Tensor<T> {
         }
 
         // Helper function to format nested tensors recursively
-        fn format_tensor<T: ScalarTrait + fmt::Debug>(tensor: &Tensor<T>, level: usize, f: &mut fmt::Formatter) -> fmt::Result {
+        fn format_tensor<T: ScalarTrait + fmt::Debug>(
+            tensor: &Tensor<T>,
+            level: usize,
+            f: &mut fmt::Formatter,
+        ) -> fmt::Result {
             writeln!(f, "{}Tensor {{", indent(level))?;
             writeln!(f, "{}data: [", indent(level + 1))?;
 

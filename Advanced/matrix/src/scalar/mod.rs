@@ -2,9 +2,7 @@ pub mod complex;
 pub use complex::Complex;
 
 use core::fmt;
-use std::ops::{Add, Sub, Mul, Div, Neg, AddAssign, SubAssign, MulAssign, DivAssign};
-
-
+use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
 pub trait ScalarTrait:
     Copy
@@ -24,7 +22,8 @@ pub trait ScalarTrait:
 {
     fn unit() -> Self;
     fn mul_add(self, a: Self, b: Self) -> Self;
-    fn fromf32(n :f32) -> Self;
+    fn fromf32(n: f32) -> Self;
+    fn conjugate(self) -> Self;
 }
 
 impl ScalarTrait for f32 {
@@ -34,7 +33,10 @@ impl ScalarTrait for f32 {
     fn mul_add(self, a: Self, b: Self) -> Self {
         self.mul_add(a, b)
     }
-    fn fromf32(n :f32) -> Self {
+    fn fromf32(n: f32) -> Self {
         n
+    }
+    fn conjugate(self) -> Self {
+        self
     }
 }

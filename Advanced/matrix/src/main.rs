@@ -1,5 +1,3 @@
-
-
 // fn generate_f32_sequence(len: usize) -> Vec<f32> {
 //     (0..len).map(|x| x as f32).collect()
 // }
@@ -11,6 +9,4 @@
 //         .collect()
 // }
 
-fn main() {
-
-}
+fn main() {}

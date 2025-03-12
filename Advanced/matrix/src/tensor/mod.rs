@@ -8,17 +8,17 @@ pub mod linear_combination;
 pub use linear_combination::linear_combination;
 pub mod linear_interpretation;
 pub use linear_interpretation::lerp;
-
+pub mod conjugate_transpose;
+pub mod tensor_multiplication;
 
 #[derive(Debug, Clone)]
-pub enum Element<T:ScalarTrait> {
+pub enum Element<T: ScalarTrait> {
     Scalar(T),
-    Tensor(Box<Tensor<T>>)
+    Tensor(Box<Tensor<T>>),
 }
 
 #[derive(Clone)]
-pub struct Tensor<T: ScalarTrait> 
-{
+pub struct Tensor<T: ScalarTrait> {
     pub data: Vec<Element<T>>,
     pub dim: usize,
 }
@@ -39,16 +39,16 @@ impl<T: ScalarTrait + PartialEq> PartialEq for Tensor<T> {
     }
 }
 
-impl<T:ScalarTrait> Default for Tensor<T> {
+impl<T: ScalarTrait> Default for Tensor<T> {
     fn default() -> Self {
-        Tensor { 
-            data: vec![Element::Scalar(T::unit())], 
+        Tensor {
+            data: vec![Element::Scalar(T::unit())],
             dim: 1,
         }
     }
 }
 
-impl<T:ScalarTrait> Tensor<T> {
+impl<T: ScalarTrait> Tensor<T> {
     pub fn size(&self) -> Vec<usize> {
         let mut sizes = Vec::with_capacity(self.dim);
 
@@ -67,9 +67,8 @@ impl<T:ScalarTrait> Tensor<T> {
     }
 }
 
-impl <T:ScalarTrait> Tensor<T> {
-
-    pub fn new(sizes: Vec<usize>, elements : Vec<T>) -> Tensor<T> {
+impl<T: ScalarTrait> Tensor<T> {
+    pub fn new(sizes: Vec<usize>, elements: Vec<T>) -> Tensor<T> {
         if sizes.is_empty() {
             panic!("Tensor must have at least one dimension.");
         }
@@ -88,37 +87,33 @@ impl <T:ScalarTrait> Tensor<T> {
                 let start_idx = i * sub_tensor_size;
                 let end_idx = (i + 1) * sub_tensor_size;
                 let sub_elements = if start_idx > elements.len() {
-                        vec![]
-                    } else if end_idx > elements.len() {
-                        elements[start_idx..].to_vec() // Return all elements from start_idx to the end of the vector
-                    } else {
-                        elements[start_idx..end_idx].to_vec() // Normal case: Slice the elements from start_idx to end_idx
-                    };
-                data.push(Element::Tensor(Box::new(Self::new(remaining_sizes.clone(), sub_elements))));
+                    vec![]
+                } else if end_idx > elements.len() {
+                    elements[start_idx..].to_vec() // Return all elements from start_idx to the end of the vector
+                } else {
+                    elements[start_idx..end_idx].to_vec() // Normal case: Slice the elements from start_idx to end_idx
+                };
+                data.push(Element::Tensor(Box::new(Self::new(
+                    remaining_sizes.clone(),
+                    sub_elements,
+                ))));
             }
             Tensor {
                 data: data,
-                dim: sizes.len()
+                dim: sizes.len(),
             }
         }
     }
 
     fn new_dim1(size: usize, elements: Vec<T>) -> Tensor<T> {
         let mut data: Vec<Element<T>> = Vec::with_capacity(size);
-    
+
         for i in 0..size {
             data.push(Element::Scalar(*elements.get(i).unwrap_or(&T::unit())));
         }
-        Tensor {
-            data: data,
-            dim: 1,
-        }
+        Tensor { data: data, dim: 1 }
     }
 }
-
-
-
-
 
 #[cfg(test)]
 mod tests {
@@ -133,7 +128,10 @@ mod tests {
     // Helper function to generate a vector of increasing Complex numbers
     fn generate_complex_sequence(len: usize) -> Vec<Complex> {
         (0..len)
-            .map(|x| Complex { re: x as f32, im: (x as f32) * 2.0 })
+            .map(|x| Complex {
+                re: x as f32,
+                im: (x as f32) * 2.0,
+            })
             .collect()
     }
 

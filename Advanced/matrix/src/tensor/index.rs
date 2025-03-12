@@ -1,4 +1,4 @@
-use crate::{ScalarTrait, Tensor, Element};
+use crate::{Element, ScalarTrait, Tensor};
 use std::ops::{Index, IndexMut};
 
 impl<T: ScalarTrait> Index<usize> for Tensor<T> {
@@ -10,7 +10,6 @@ impl<T: ScalarTrait> Index<usize> for Tensor<T> {
 }
 
 impl<T: ScalarTrait> IndexMut<usize> for Tensor<T> {
-
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         &mut self.data[index]
     }
