@@ -1,9 +1,13 @@
+use std::ops::Deref;
+
 use crate::ScalarTrait;
 pub mod basic_arithmetic;
 pub mod display_debug;
 pub mod index;
 pub mod linear_combination;
 pub use linear_combination::linear_combination;
+pub mod linear_interpretation;
+pub use linear_interpretation::lerp;
 
 
 #[derive(Debug, Clone)]
@@ -17,6 +21,22 @@ pub struct Tensor<T: ScalarTrait>
 {
     pub data: Vec<Element<T>>,
     pub dim: usize,
+}
+
+impl<T: ScalarTrait> PartialEq for Element<T> {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Element::Scalar(a), Element::Scalar(b)) => a == b,
+            (Element::Tensor(a), Element::Tensor(b)) => (a.deref()) == (b.deref()), //more verbose than a == b
+            _ => false,
+        }
+    }
+}
+
+impl<T: ScalarTrait + PartialEq> PartialEq for Tensor<T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.dim == other.dim && self.data == other.data
+    }
 }
 
 impl<T:ScalarTrait> Default for Tensor<T> {

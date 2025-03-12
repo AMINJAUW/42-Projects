@@ -17,9 +17,13 @@ impl ScalarTrait for Complex {
     /// = (z0.re * z1.re - z0.im * z1.im + z2.re) + (z0.re * z1.im + z0.im * z1.re + z2.im)i 
     fn mul_add(self, a: Self, b: Self) -> Self {
         Complex { 
-            re: self.re.mul_add(a.re, -self.im.mul_add(a.im, b.re)),
+            re: self.re.mul_add(a.re, self.im.mul_add(-a.im, b.re)),
             im: self.re.mul_add(a.im,  self.im.mul_add(a.re, b.im)),
         }
+    }
+
+    fn fromf32(n :f32) -> Self {
+        Complex { re: n, im: 0.0 }
     }
 }
 
@@ -70,19 +74,6 @@ impl Mul for Complex {
         Self {
             re: self.re * rhs.re - self.im * rhs.im,
             im: self.re * rhs.im + self.im * rhs.re,
-        }
-    }
-}
-
-//implementation multiplication with a f32
-impl Mul<f32> for Complex {
-
-    type Output = Self;
-    
-    fn mul(self, rhs: f32) -> Self::Output {
-        Self {
-            re: self.re * rhs,
-            im: self.im * rhs,
         }
     }
 }
