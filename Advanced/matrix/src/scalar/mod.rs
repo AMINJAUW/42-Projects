@@ -7,6 +7,7 @@ use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssi
 pub trait ScalarTrait:
     Copy
     + Clone
+    + fmt::Debug
     + PartialEq
     + Add<Output = Self>
     + Sub<Output = Self>
