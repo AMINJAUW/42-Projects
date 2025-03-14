@@ -25,8 +25,8 @@ impl<T: ScalarTrait> Tensor<T> {
     }
 
     fn higher_dim_transpose(self) -> Self {
-        let sizes = self.size();
-		let (outer, inner) = (sizes[0], sizes[1]);
+        let shape = self.shape();
+		let (outer, inner) = (shape[0], shape[1]);
         let mut new_data = Vec::with_capacity(inner);
 
 		for j in 0..inner {

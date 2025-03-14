@@ -5,8 +5,8 @@ fn same_length_tensors<T: ScalarTrait>(tensors: &[Tensor<T>]) -> bool {
         return true;
     }
 
-    let first_size = tensors[0].size();
-    tensors.iter().all(|tensor| tensor.size() == first_size)
+    let first_size = tensors[0].shape();
+    tensors.iter().all(|tensor| tensor.shape() == first_size)
 }
 
 ///
@@ -75,7 +75,7 @@ mod tests {
     }
 
     #[test]
-    fn test_linear_combination_mismatched_sizes() {
+    fn test_linear_combination_mismatched_shape() {
         let t1 = Tensor::new(vec![2, 2, 2], vec![1.0; 8]);
         let t2 = Tensor::new(vec![2, 2, 2], vec![2.0; 8]);
 

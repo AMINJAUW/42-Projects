@@ -51,7 +51,7 @@ mod tests {
         let elements = generate_f32_sequence(5);
         let vector = Vector::new(elements.clone());
 
-        assert_eq!(vector.size(), vec![5]);
+        assert_eq!(vector.shape(), vec![5]);
 
         for i in 0..5 {
             match &vector[i] {
@@ -66,7 +66,7 @@ mod tests {
         let elements = generate_complex_sequence(3);
         let vector = Vector::new(elements.clone());
 
-        assert_eq!(vector.size(), vec![3]);
+        assert_eq!(vector.shape(), vec![3]);
 
         for i in 0..3 {
             match &vector[i] {

@@ -8,7 +8,7 @@ impl<T: ScalarTrait> fmt::Display for Tensor<T> {
             indices: &mut Vec<usize>,
             f: &mut fmt::Formatter<'_>,
         ) -> fmt::Result {
-            let dims = tensor.size();
+            let dims = tensor.shape();
             if dims.len() == 1 {
                 // 1D Tensor: Print as vertical vector
                 for i in 0..tensor.data.len() {

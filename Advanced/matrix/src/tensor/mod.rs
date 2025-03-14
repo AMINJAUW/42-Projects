@@ -49,37 +49,37 @@ impl<T: ScalarTrait> Default for Tensor<T> {
 }
 
 impl<T: ScalarTrait> Tensor<T> {
-    pub fn size(&self) -> Vec<usize> {
-        let mut sizes = Vec::with_capacity(self.dim);
+    pub fn shape(&self) -> Vec<usize> {
+        let mut shape = Vec::with_capacity(self.dim);
 
         // Get the size of the outer container (either stack or heap)
-        sizes.push(self.data.len());
+        shape.push(self.data.len());
         if self.data.len() == 0 {
-            return sizes;
+            return shape;
         }
         match &self.data[0] {
-            Element::Scalar(_) => sizes,
+            Element::Scalar(_) => shape,
             Element::Tensor(tensor) => {
-                sizes.extend(tensor.size());
-                sizes
+                shape.extend(tensor.shape());
+                shape
             }
         }
     }
 }
 
 impl<T: ScalarTrait> Tensor<T> {
-    pub fn new(sizes: Vec<usize>, elements: Vec<T>) -> Tensor<T> {
-        if sizes.is_empty() {
+    pub fn new(shape: Vec<usize>, elements: Vec<T>) -> Tensor<T> {
+        if shape.is_empty() {
             panic!("Tensor must have at least one dimension.");
         }
 
-        if sizes.len() == 1 {
-            Self::new_dim1(sizes[0], elements)
+        if shape.len() == 1 {
+            Self::new_dim1(shape[0], elements)
         } else {
-            let sub_tensor_count = sizes[0]; // Number of subtensors at this level
-            let remaining_sizes = sizes[1..].to_vec(); // Remaining sizes for subtensors
+            let sub_tensor_count = shape[0]; // Number of subtensors at this level
+            let remaining_shape = shape[1..].to_vec(); // Remaining shape for subtensors
 
-            let sub_tensor_size: usize = remaining_sizes.clone().iter().product(); // number of Elements in each sub-tensor
+            let sub_tensor_size: usize = remaining_shape.clone().iter().product(); // number of Elements in each sub-tensor
 
             let mut data = Vec::with_capacity(sub_tensor_count);
 
@@ -94,13 +94,13 @@ impl<T: ScalarTrait> Tensor<T> {
                     elements[start_idx..end_idx].to_vec() // Normal case: Slice the elements from start_idx to end_idx
                 };
                 data.push(Element::Tensor(Box::new(Self::new(
-                    remaining_sizes.clone(),
+                    remaining_shape.clone(),
                     sub_elements,
                 ))));
             }
             Tensor {
                 data: data,
-                dim: sizes.len(),
+                dim: shape.len(),
             }
         }
     }
@@ -137,27 +137,27 @@ mod tests {
 
     #[test]
     fn test_tensor_creation_f32() {
-        let sizes = vec![2, 2]; // 2x2 tensor
+        let shape = vec![2, 2]; // 2x2 tensor
         let elements = generate_f32_sequence(4);
-        let tensor = Tensor::new(sizes, elements);
+        let tensor = Tensor::new(shape, elements);
 
-        assert_eq!(tensor.size(), vec![2, 2]); // Ensure dimensions match
+        assert_eq!(tensor.shape(), vec![2, 2]); // Ensure dimensions match
     }
 
     #[test]
     fn test_tensor_creation_complex() {
-        let sizes = vec![2, 3]; // 2x3 tensor
+        let shape = vec![2, 3]; // 2x3 tensor
         let elements = generate_complex_sequence(6);
-        let tensor = Tensor::new(sizes, elements);
+        let tensor = Tensor::new(shape, elements);
 
-        assert_eq!(tensor.size(), vec![2, 3]); // Ensure dimensions match
+        assert_eq!(tensor.shape(), vec![2, 3]); // Ensure dimensions match
     }
 
     #[test]
     fn test_indexing_f32() {
-        let sizes = vec![2, 2];
+        let shape = vec![2, 2];
         let elements = generate_f32_sequence(4);
-        let tensor = Tensor::new(sizes, elements);
+        let tensor = Tensor::new(shape, elements);
 
         match &tensor[0] {
             Element::Tensor(sub_tensor) => match &sub_tensor[1] {
@@ -170,9 +170,9 @@ mod tests {
 
     #[test]
     fn test_indexing_complex() {
-        let sizes = vec![2, 2];
+        let shape = vec![2, 2];
         let elements = generate_complex_sequence(4);
-        let tensor = Tensor::new(sizes, elements);
+        let tensor = Tensor::new(shape, elements);
 
         match &tensor[1] {
             Element::Tensor(sub_tensor) => match &sub_tensor[0] {
@@ -188,10 +188,10 @@ mod tests {
 
     #[test]
     fn test_addition_f32() {
-        let sizes = vec![2, 2];
+        let shape = vec![2, 2];
         let elements = generate_f32_sequence(4);
-        let tensor1 = Tensor::new(sizes.clone(), elements.clone());
-        let tensor2 = Tensor::new(sizes, elements);
+        let tensor1 = Tensor::new(shape.clone(), elements.clone());
+        let tensor2 = Tensor::new(shape, elements);
 
         let result = tensor1.clone() + tensor2;
 
@@ -206,10 +206,10 @@ mod tests {
 
     #[test]
     fn test_addition_complex() {
-        let sizes = vec![2, 2];
+        let shape = vec![2, 2];
         let elements = generate_complex_sequence(4);
-        let tensor1 = Tensor::new(sizes.clone(), elements.clone());
-        let tensor2 = Tensor::new(sizes, elements);
+        let tensor1 = Tensor::new(shape.clone(), elements.clone());
+        let tensor2 = Tensor::new(shape, elements);
 
         let result = tensor1.clone() + tensor2;
 
@@ -227,9 +227,9 @@ mod tests {
 
     #[test]
     fn test_multiplication_f32() {
-        let sizes = vec![2, 2];
+        let shape = vec![2, 2];
         let elements = generate_f32_sequence(4);
-        let tensor = Tensor::new(sizes, elements);
+        let tensor = Tensor::new(shape, elements);
 
         let result = tensor.clone() * 2.0;
 
@@ -244,9 +244,9 @@ mod tests {
 
     #[test]
     fn test_multiplication_complex() {
-        let sizes = vec![2, 2];
+        let shape = vec![2, 2];
         let elements = generate_complex_sequence(4);
-        let tensor = Tensor::new(sizes, elements);
+        let tensor = Tensor::new(shape, elements);
 
         let result = tensor.clone() * Complex { re: 2.0, im: 0.0 };
 

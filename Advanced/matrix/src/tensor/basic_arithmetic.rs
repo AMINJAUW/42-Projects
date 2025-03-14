@@ -7,7 +7,7 @@ impl<T: ScalarTrait> Add for Tensor<T> {
 
     fn add(self, rhs: Self) -> Tensor<T> {
         if self.data.len() != rhs.data.len() {
-            panic!("Trying to Add 2 tensors of different sizes");
+            panic!("Trying to Add 2 tensors of different shape");
         }
 
         let mut result = self.clone(); // Clone the Tensor, not the elements
@@ -33,7 +33,7 @@ impl<T: ScalarTrait> Sub for Tensor<T> {
 
     fn sub(self, rhs: Self) -> Self::Output {
         if self.data.len() != rhs.data.len() {
-            panic!("Trying to Sub 2 tensors of different sizes");
+            panic!("Trying to Sub 2 tensors of different shape");
         }
 
         let mut result = self.clone(); // Clone the Tensor, not the elements
@@ -72,8 +72,8 @@ impl<T: ScalarTrait> Mul<T> for Tensor<T> {
 
 impl<T: ScalarTrait> Tensor<T> {
     pub fn mul_add(self, coef: T, add: Self) -> Self {
-        if self.size() != add.size() {
-            panic!("Mul_add with tensors of different sizes")
+        if self.shape() != add.shape() {
+            panic!("Mul_add with tensors of different shape")
         }
         let mut result = self.clone();
         for i in 0..self.data.len() {

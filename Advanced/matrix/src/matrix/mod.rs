@@ -53,7 +53,7 @@ mod tests {
         let matrix = Matrix::new(vec![col1.clone(), col2.clone()]);
 
         assert_eq!(matrix.dim, 2);
-        assert_eq!(matrix.size(), vec![2, 3]); // 2 columns, each with 3 elements
+        assert_eq!(matrix.shape(), vec![2, 3]); // 2 columns, each with 3 elements
     }
 
     #[test]
@@ -64,14 +64,14 @@ mod tests {
         let matrix = Matrix::new(vec![col1.clone(), col2.clone()]);
 
         assert_eq!(matrix.dim, 2);
-        assert_eq!(matrix.size(), vec![2, 3]); // 2 columns, each with 3 elements
+        assert_eq!(matrix.shape(), vec![2, 3]); // 2 columns, each with 3 elements
     }
 
     #[test]
     fn test_matrix_empty() {
         let matrix: Matrix<f32> = Matrix::new(vec![]);
         assert_eq!(matrix.dim, 2);
-        assert_eq!(matrix.size(), vec![0]); // No columns
+        assert_eq!(matrix.shape(), vec![0]); // No columns
     }
 
     #[test]
@@ -82,7 +82,7 @@ mod tests {
 
         let matrix = Matrix::new(vec![col1, col2, col3]);
 
-        assert_eq!(matrix.size(), vec![3, 2]); // 3 columns, each with 2 elements
+        assert_eq!(matrix.shape(), vec![3, 2]); // 3 columns, each with 2 elements
     }
 
     #[test]
