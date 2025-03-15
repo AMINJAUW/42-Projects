@@ -1,4 +1,4 @@
-use std::ops::Mul;
+use std:: ops::Mul;
 
 use crate::ScalarTrait;
 
@@ -21,115 +21,150 @@ fn compatible_sizes(l_shape: Vec<usize>, r_shape: Vec<usize>) -> bool {
 impl <T:ScalarTrait> Mul for Tensor<T> {
 	type Output = Tensor<T>;
 
-
 	fn mul(self, rhs: Self) -> Self::Output {
 		let (l_shape, r_shape) = (self.shape(), rhs.shape());
 		if !compatible_sizes(l_shape.clone(), r_shape.clone()) {
 			panic!("Incompatible shapes of Tensor multiplication")
 		} else {
-			let (outer, inner, sum_size) = 
-			(*l_shape.get(0).unwrap(), *r_shape.get(1).unwrap(), *l_shape.get(1).unwrap());
+			let (outer, inner, sum_size) = (l_shape[0], r_shape[1], l_shape[1]);
 			
-			let mut new_columns = Vec::with_capacity(outer);
-			let dim = self.dim;
+			let mut result_columns = Vec::with_capacity(outer);
 
 			let lhs = self.conjugate_transpose();
 			for i in 0..outer {
 				let mut new_col = Vec::with_capacity(inner);
 				for j in 0..inner {
-					match &lhs.data[i] {
-						Element::Scalar(_) => {
-							match &rhs.data[j] {
-								Element::Scalar(_) => {
-									let mut result = T::default();
-									for k in 0..sum_size {
-										if let (Element::Scalar(v), Element::Scalar(u)) = (lhs[k].clone(), rhs[k].clone()) {
-											let temp = v.mul_add(u, result);
-											result = temp;
-										} else {
-											unreachable!("Have Checked before that the 2 tensor to multiply are made of scalars")
-										}
-									}
-									new_col.push(Element::Scalar(result));
+					let mut sum = T::default();
+					let mut tensor_result: Option<Tensor<T>> = None;
+
+					for k in 0..sum_size {
+						match (&lhs[i], &rhs[j]) {
+							(Element::Scalar(_), Element::Scalar(_)) => {
+								if let (Element::Scalar(v), Element::Scalar(u)) = (&lhs[k], &rhs[k]) {
+									sum = v.mul_add(*u, sum);
 								}
-								Element::Tensor(sub_tensor) => {
-									let mut result = T::default();
-									for k in 0..sum_size {
-										if let (Element::Scalar(v), Element::Scalar(u)) = (lhs[k].clone(), sub_tensor[k].clone()) {
-											let temp = v.mul_add(u, result);
-											result = temp;
-										} else {
-											unreachable!("The right side is a Scalar tensor to be a valid multiplication the left should be a tensor of tensor of scalars")
-										}
+							}
+							(Element::Tensor(r_subtensor), Element::Scalar(_)) => {
+								if let (Element::Scalar(v), Element::Scalar(u)) = (&r_subtensor[k], &rhs[k]) {
+									sum = v.mul_add(*u, sum);
+								}
+							}
+							(Element::Scalar(_), Element::Tensor(l_subtensor)) => {
+								if let (Element::Scalar(v), Element::Scalar(u)) = (&lhs[k], &l_subtensor[k]) {
+									sum = v.mul_add(*u, sum);
+								}
+							}
+							(Element::Tensor(r_subtensor), Element::Tensor(l_subtensor)) => {
+								match (&l_subtensor[k], &r_subtensor[k]) {
+									(Element::Scalar(v), Element::Scalar(u)) => {
+										sum = v.mul_add(*u, sum);
 									}
-									new_col.push(Element::Scalar(result));
+									(Element::Tensor(r_subsub_tensor), Element::Tensor(l_subsub_tensor)) => {
+										let product = *r_subsub_tensor.clone() * *l_subsub_tensor.clone();
+										tensor_result = Some(match tensor_result {
+											Some(t) => t + product,
+											None => product
+										})
+									}
+									_ => unreachable!("Unexpected Tensor Structure"),
 								}
 							}
 						}
-						Element::Tensor(l_subtensor) => {
-							match &rhs.data[j] {
-								Element::Scalar(_) => {
-									let mut result = T::default();
-									for k in 0..sum_size {
-										if let (Element::Scalar(v), Element::Scalar(u)) = (l_subtensor[k].clone(), rhs[k].clone()) {
-											let temp = v.mul_add(u, result);
-											result = temp;
-										} else {
-											unreachable!("The left side is a Scalar tensor to be a valid multiplication the right should be a tensor of tensor of scalars")
-										}
-									}
-									new_col.push(Element::Scalar(result));									
-								}
-								Element::Tensor(r_subtensor) => {
-									let mut scalar_result = T::default();
-									let mut tensor_result = if let (Element::Tensor(u),Element::Tensor(v)) = (&l_subtensor[0], &r_subtensor[0]) {
-										Some(*u.clone() * *v.clone())
-									} else {
-										None
-									};
-									for k in 0..sum_size {
-										match (&l_subtensor[k], &r_subtensor[k]) {
-											(Element::Scalar(v),Element::Scalar(u)) => {
-												let temp = v.mul_add(*u, scalar_result);
-												if k == sum_size - 1 {
-													new_col.push(Element::Scalar(temp));
-												} else {
-													scalar_result = temp;
-												}
-											}
-											(Element::Tensor(v),Element::Tensor(u)) => {
-												if k == 0 {
-													continue;
-												}
-												tensor_result = Some(tensor_result.unwrap() + (*v.clone() * *u.clone()));
-												if k == sum_size - 1 {
-													new_col.push(Element::Tensor(Box::new(tensor_result.clone().unwrap())));
-												}
-											}
-											_ => {
-												unreachable!("The left side is a Scalar tensor to be a valid multiplication the right should be a tensor of tensor of scalars")
-											}
-										}	
-									}
-								
-								}
-							}
-						}
-					} 
-				if inner == 1 {
-					new_columns = new_col.clone();
-				} else {
-					new_columns.push(
-						Element::Tensor(Box::new(Tensor { data: new_col.clone(), dim: dim - 2 }))
-					);
+					}
+
+					new_col.push(if let Some(tensor) = tensor_result {
+						Element::Tensor(Box::new(tensor))
+					} else {
+						Element::Scalar(sum)
+					});
 				}
+				if inner == 1 {
+					result_columns = new_col.clone();
+				} else {
+					result_columns.push(Element::Tensor(Box::new(Tensor 
+						{ 
+							data: new_col, 
+							dim: lhs.dim -2 
+						})));
+				}
+				
 			} 
-			
-			}
 			Tensor {
-				data: new_columns,
-				dim: dim,
+				data: result_columns,
+				dim: lhs.dim,
 			}
 		}
 	}
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Helper function to generate a vector of `f32` values
+    fn generate_f32_sequence(len: usize) -> Vec<f32> {
+        (0..len).map(|x| x as f32).collect()
+    }
+
+    #[test]
+    fn test_scalar_multiplication() {
+        let tensor1 = Tensor::new(vec![1], vec![2.0]); // Scalar 2.0
+        let tensor2 = Tensor::new(vec![1], vec![3.0]); // Scalar 3.0
+        let result = tensor1 * tensor2;
+
+        assert_eq!(result.shape(), vec![1]);
+        assert_eq!(result.data, vec![Element::Scalar(6.0)]);
+    }
+
+    #[test]
+    fn test_1d_tensor_multiplication() {
+        let tensor1 = Tensor::new(vec![1, 3], generate_f32_sequence(3)); // [0.0, 1.0, 2.0] as horizontal vector
+        let tensor2 = Tensor::new(vec![3], generate_f32_sequence(3)); // [0.0, 1.0, 2.0] as vertical vector
+
+        let result = tensor1 * tensor2;
+        
+        assert_eq!(result.shape(), vec![1]); // Should be a 1x1 matrix
+		assert_eq!(result.data[0], Element::Scalar(5.0))
+    }
+
+    #[test]
+    fn test_1d_tensor_to_2d_multiplication() {
+        let tensor1 = Tensor::new(vec![3], generate_f32_sequence(3)); // [0.0, 1.0, 2.0] as vertical vector
+        let tensor2 = Tensor::new(vec![1, 3], generate_f32_sequence(3)); // [0.0, 1.0, 2.0] as horizontal vector
+
+        let result = tensor1 * tensor2;
+        
+        assert_eq!(result.shape(), vec![3,3]); // Should be a 3x3 matrix
+		
+		assert_eq!(result, Tensor::new(vec![3,3], vec![0., 0., 0., 0., 1., 2., 0., 2., 4.]))
+    }
+
+    // #[test]
+    // fn test_2d_matrix_multiplication() {
+    //     let tensor1 = Tensor::new(vec![2, 3], generate_f32_sequence(6)); // 2x3 matrix
+    //     let tensor2 = Tensor::new(vec![3, 2], generate_f32_sequence(6)); // 3x2 matrix
+
+    //     let result = tensor1 * tensor2;
+        
+    //     assert_eq!(result.shape(), vec![2, 2]); // Should result in a 2x2 matrix
+    // }
+
+    // #[test]
+    // fn test_incompatible_shapes() {
+    //     let tensor1 = Tensor::new(vec![2, 3], generate_f32_sequence(6)); // 2x3 matrix
+    //     let tensor2 = Tensor::new(vec![4, 2], generate_f32_sequence(8)); // 4x2 matrix (incompatible)
+
+    //     let result = std::panic::catch_unwind(|| tensor1 * tensor2);
+    //     assert!(result.is_err()); // Should panic due to incompatible shapes
+    // }
+
+    // #[test]
+    // fn test_higher_dimensional_multiplication() {
+    //     let tensor1 = Tensor::new(vec![2, 3, 4], generate_f32_sequence(24)); // 2x3x4 tensor
+    //     let tensor2 = Tensor::new(vec![4, 5], generate_f32_sequence(20)); // 4x5 matrix
+
+    //     let result = tensor1 * tensor2;
+
+    //     assert_eq!(result.shape(), vec![2, 3, 5]); // Expected shape after multiplication
+    // }
 }
