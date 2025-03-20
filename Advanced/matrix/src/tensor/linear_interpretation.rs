@@ -8,7 +8,7 @@ use super::Tensor;
 ///
 /// The formula accept t to be outside [0;1] as stated in the yellow note at the end
 pub fn lerp<T: ScalarTrait>(u: Tensor<T>, v: Tensor<T>, t: f32) -> Tensor<T> {
-    return (v - u.clone()).mul_add(T::fromf32(t), u);
+    return (v - u.clone()).mul_add_scalar(T::fromf32(t), u);
 }
 
 #[cfg(test)]

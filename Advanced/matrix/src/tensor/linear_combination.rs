@@ -25,7 +25,7 @@ pub fn linear_combination<T: ScalarTrait>(u: &[Tensor<T>], coef: &[T]) -> Tensor
     let mut previous = u[0].clone() * coef[0];
     let mut result = Tensor::default();
     for i in 1..u.len() {
-        result = u[i].clone().mul_add(coef[i], previous);
+        result = u[i].clone().mul_add_scalar(coef[i], previous);
         previous = result.clone();
     }
     result

@@ -71,9 +71,9 @@ impl<T: ScalarTrait> Mul<T> for Tensor<T> {
 }
 
 impl<T: ScalarTrait> Tensor<T> {
-    pub fn mul_add(self, coef: T, add: Self) -> Self {
+    pub fn mul_add_scalar(self, coef: T, add: Self) -> Self {
         if self.shape() != add.shape() {
-            panic!("Mul_add with tensors of different shape")
+            panic!("Mul_add_scalar with tensors of different shape")
         }
         let mut result = self.clone();
         for i in 0..self.data.len() {
@@ -83,7 +83,7 @@ impl<T: ScalarTrait> Tensor<T> {
                 }
                 (Element::Tensor(left), Element::Tensor(right)) => {
                     result[i] =
-                        Element::Tensor(Box::new(left.clone().mul_add(coef, *right.clone())))
+                        Element::Tensor(Box::new(left.clone().mul_add_scalar(coef, *right.clone())))
                 }
                 _ => {
                     unreachable!()
@@ -91,5 +91,27 @@ impl<T: ScalarTrait> Tensor<T> {
             }
         }
         result
+    }
+
+    pub fn mul_add_tensor(self, rhs: Self, add: Self) -> Self {
+        if self.shape() != add.shape() && self.shape() != rhs.shape() {
+            panic!("Mul_add_tensor with tensors of different shape")
+        }
+        let mut result = self.clone();
+        for i in 0..self.data.len() {
+            match (&self.data[i], &rhs.data[i], &add.data[i]) {
+                (Element::Scalar(left), Element::Scalar(right), Element::Scalar(add)) => {
+                    result[i] = Element::Scalar(left.mul_add(*right, *add))
+                }
+                (Element::Tensor(left), Element::Tensor(right), Element::Tensor(add)) => {
+                    result[i] =
+                        Element::Tensor(Box::new(left.clone().mul_add_tensor(*right.clone(), *add.clone())))
+                }
+                _ => {
+                    unreachable!()
+                }
+            }
+        }
+        result 
     }
 }
